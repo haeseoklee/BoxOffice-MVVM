@@ -12,7 +12,6 @@
 		1C4A71AF27843D830017E326 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71A927843D820017E326 /* UserData.swift */; };
 		1C4A71B027843D830017E326 /* CommentList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71AA27843D830017E326 /* CommentList.swift */; };
 		1C4A71B127843D830017E326 /* MovieList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71AB27843D830017E326 /* MovieList.swift */; };
-		1C4A71B227843D830017E326 /* MovieData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71AC27843D830017E326 /* MovieData.swift */; };
 		1C4A71B327843D830017E326 /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71AD27843D830017E326 /* Movie.swift */; };
 		1C4A71B527843DB70017E326 /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71B427843DB70017E326 /* UIViewController+Extension.swift */; };
 		1C4A71B827843DFF0017E326 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71B627843DFF0017E326 /* SceneDelegate.swift */; };
@@ -50,7 +49,6 @@
 		1C4A71A927843D820017E326 /* UserData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		1C4A71AA27843D830017E326 /* CommentList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentList.swift; sourceTree = "<group>"; };
 		1C4A71AB27843D830017E326 /* MovieList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieList.swift; sourceTree = "<group>"; };
-		1C4A71AC27843D830017E326 /* MovieData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieData.swift; sourceTree = "<group>"; };
 		1C4A71AD27843D830017E326 /* Movie.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
 		1C4A71B427843DB70017E326 /* UIViewController+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		1C4A71B627843DFF0017E326 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -162,7 +160,6 @@
 				1C4A71A827843D820017E326 /* Comment.swift */,
 				1C4A71AA27843D830017E326 /* CommentList.swift */,
 				1C4A71AD27843D830017E326 /* Movie.swift */,
-				1C4A71AC27843D830017E326 /* MovieData.swift */,
 				1C4A71AB27843D830017E326 /* MovieList.swift */,
 				1C4A71A927843D820017E326 /* UserData.swift */,
 			);
@@ -198,19 +195,19 @@
 		1C4A71A627842F450017E326 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				1C4A71C027843E500017E326 /* BoxOfficeTabBarController.swift */,
+				1C4A71C527843E500017E326 /* BoxOfficeTableViewController.swift */,
+				1C4A71C327843E500017E326 /* BoxOfficeCollectionViewController.swift */,
+				1C4A71D027843E820017E326 /* BoxOfficeTableViewCell.swift */,
 				1C4A71CE27843E820017E326 /* BoxOfficeCollectionViewCell.swift */,
 				1C4A71D327843E820017E326 /* BoxOfficeDetailHeaderView.swift */,
 				1C4A71CD27843E820017E326 /* BoxOfficeDetailInfoHeaderView.swift */,
 				1C4A71D227843E820017E326 /* BoxOfficeDetailReviewHeaderView.swift */,
 				1C4A71D127843E820017E326 /* BoxOfficeDetailSummaryHeaderView.swift */,
 				1C4A71CF27843E820017E326 /* BoxOfficeDetailTableViewCell.swift */,
-				1C4A71D027843E820017E326 /* BoxOfficeTableViewCell.swift */,
 				1C4A71CC27843E820017E326 /* StarRatingBarView.swift */,
-				1C4A71C327843E500017E326 /* BoxOfficeCollectionViewController.swift */,
 				1C4A71C127843E500017E326 /* BoxOfficeDetailViewController.swift */,
 				1C4A71C227843E500017E326 /* BoxOfficeReviewWriteViewController.swift */,
-				1C4A71C027843E500017E326 /* BoxOfficeTabBarController.swift */,
-				1C4A71C527843E500017E326 /* BoxOfficeTableViewController.swift */,
 				1C4A71C427843E500017E326 /* MovieImageDetailViewController.swift */,
 			);
 			path = Views;
@@ -364,7 +361,6 @@
 				1C4A71B327843D830017E326 /* Movie.swift in Sources */,
 				1C4A71AF27843D830017E326 /* UserData.swift in Sources */,
 				1C4A71DF27843EB60017E326 /* APIConstants.swift in Sources */,
-				1C4A71B227843D830017E326 /* MovieData.swift in Sources */,
 				1C4A71C827843E500017E326 /* BoxOfficeReviewWriteViewController.swift in Sources */,
 				1C4A71D627843E820017E326 /* BoxOfficeCollectionViewCell.swift in Sources */,
 				1C4A71E3278472220017E326 /* BoxOffice.swift in Sources */,

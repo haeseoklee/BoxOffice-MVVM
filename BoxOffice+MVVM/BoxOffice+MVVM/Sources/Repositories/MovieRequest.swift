@@ -6,21 +6,44 @@
 //
 
 import Foundation
-
-enum MovieRequestError: Int, Error {
-    case unknown = -1
-    case jsonError = -2
-    case invalidArgument = -3
-    case badRequest = 400
-    case notFound = 404
-    case internalServerError = 500
-}
-
+import RxSwift
 
 struct MovieRequest {
     static let shared = MovieRequest()
     
-    func sendGetMovieListRequest(orderType: Int, completion: @escaping (Result<MovieList, MovieRequestError>) -> Void) {
+    func getMovieListRx(orderType: Int) -> Observable<MovieList> {
+        return Observable.create { observer in
+            DispatchQueue.global().async {
+                sendGetMovieListRequest(orderType: orderType) { result in
+                    switch result {
+                    case .success(let movies):
+                        observer.onNext(movies)
+                    case .failure(let error):
+                        observer.onError(error)
+                    }
+                }
+            }
+            return Disposables.create()
+        }
+    }
+    
+    func getMovieRx(id: String) -> Observable<Movie> {
+        return Observable.create { observer in
+            DispatchQueue.global().async {
+                sendGetMovieRequest(id: id) { result in
+                    switch result {
+                    case .success(let movie):
+                        observer.onNext(movie)
+                    case .failure(let error):
+                        observer.onError(error)
+                    }
+                }
+            }
+            return Disposables.create()
+        }
+    }
+    
+    func sendGetMovieListRequest(orderType: Int, completion: @escaping (Result<MovieList, RequestError>) -> Void) {
         var components = URLComponents(string: APIConstants.movieListURL)
         let items: [URLQueryItem] = [
             URLQueryItem(name: "order_type", value: "\(orderType)")
@@ -43,7 +66,7 @@ struct MovieRequest {
                             completion(.failure(.jsonError))
                         }
                     } else {
-                        let movieRequestError = MovieRequestError(rawValue: response.statusCode) ?? .unknown
+                        let movieRequestError = RequestError(rawValue: response.statusCode) ?? .unknown
                         completion(.failure(movieRequestError))
                     }
                 } else {
@@ -54,7 +77,7 @@ struct MovieRequest {
         }
     }
     
-    func sendGetMovieRequest(id: String, completion: @escaping (Result<Movie, MovieRequestError>) -> Void) {
+    func sendGetMovieRequest(id: String, completion: @escaping (Result<Movie, RequestError>) -> Void) {
         var components = URLComponents(string: APIConstants.movieURL)
         let items: [URLQueryItem] = [
             URLQueryItem(name: "id", value: "\(id)")
@@ -73,7 +96,7 @@ struct MovieRequest {
                             completion(.failure(.jsonError))
                         }
                     } else {
-                        let movieRequestError = MovieRequestError(rawValue: response.statusCode) ?? .unknown
+                        let movieRequestError = RequestError(rawValue: response.statusCode) ?? .unknown
                         completion(.failure(movieRequestError))
                     }
                 } else {

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 final class BoxOfficeCollectionViewController: UIViewController {
     
@@ -13,38 +14,24 @@ final class BoxOfficeCollectionViewController: UIViewController {
     private lazy var movieCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        collectionView.register(BoxOfficeCollectionViewCell.self, forCellWithReuseIdentifier: Constants.Identifier.boxOfficeCollectionViewCell)
         collectionView.refreshControl = refreshControl
+        collectionView.register(BoxOfficeCollectionViewCell.self, forCellWithReuseIdentifier: Constants.Identifier.boxOfficeCollectionViewCell)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
     
     private lazy var rightBarButton: UIBarButtonItem = {
-        let rightBarButton = UIBarButtonItem(image: UIImage(named: "ic_settings"), style: .plain, target: self, action: #selector(touchUpRightBarButton(_:)))
+        let rightBarButton = UIBarButtonItem(image: UIImage(named: "ic_settings"), style: .plain, target: nil, action: nil)
         rightBarButton.tintColor = .white
         return rightBarButton
     }()
     
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(
-            self,
-            action: #selector(refreshMovieCollectionView),
-            for: .valueChanged
-        )
         return refreshControl
     }()
     
     // MARK: - Variables
-    private var movieOrderType: MovieOrderType = MovieData.shared.orderType {
-        willSet {
-            MovieData.shared.orderType = newValue
-            navigationItem.title = newValue.toKorean()
-        }
-    }
-    
     private var boxOfficeCollectionViewCellSize: CGSize {
         let width = (view.safeAreaLayoutGuide.layoutFrame.size.width - 20) / 2
         return CGSize(width: width, height: width * 2)
@@ -55,19 +42,25 @@ final class BoxOfficeCollectionViewController: UIViewController {
         return CGSize(width: width, height: width * 2)
     }
     
-    // MARK: - LifeCycles
+    private let viewModel: MovieListViewModelType
+    private var disposeBag: DisposeBag = DisposeBag()
+    
+    // MARK: - Life Cycle
+    init() {
+        viewModel = MovieListViewModel.shared
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        viewModel = MovieListViewModel.shared
+        super.init(coder: coder)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
         setupNavigationBar()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        if MovieData.shared.movieList.isEmpty || movieOrderType != MovieData.shared.orderType {
-            fetchMovieList(orderType: MovieData.shared.orderType)
-        }
-        updateMovieOrderType(orderType: MovieData.shared.orderType)
+        setupBindings()
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -96,109 +89,118 @@ final class BoxOfficeCollectionViewController: UIViewController {
         navigationItem.backButtonTitle = "영화목록"
     }
     
+    private func setupBindings() {
+        
+        // viewWillAppear & tableView refreshed
+        let viewWillAppearOnce = rx.viewWillAppear.take(1).map { _ in () }
+        let refreshed = movieCollectionView.refreshControl?.rx.controlEvent(.valueChanged).map { _ in () } ?? Observable.just(())
+        Observable
+            .merge(viewWillAppearOnce, refreshed)
+            .bind(to: viewModel.fetchMoviesObserver)
+            .disposed(by: disposeBag)
+        
+        // tableViewCell tapped
+        movieCollectionView.rx.modelSelected(Movie.self)
+            .observe(on: MainScheduler.instance)
+            .bind(to: viewModel.touchMovieObserver)
+            .disposed(by: disposeBag)
+        
+        // tableView refreshControl & NetworkActivityIndicator
+        viewModel.isActivatedObservable
+            .observe(on: MainScheduler.instance)
+            .bind {[weak self] isActivated in
+                if !isActivated {
+                    self?.movieCollectionView.refreshControl?.endRefreshing()
+                }
+                if #available(iOS 13.0, *) {
+                    
+                } else {
+                    UIApplication.shared.isNetworkActivityIndicatorVisible = isActivated
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        // rightBarButton tapped
+        rightBarButton.rx.tap
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] _ in
+                self?.showActionSheet(
+                    reservationRateAction: self?.touchUpReservationRateAction(_:),
+                    curationAction: self?.touchUpCurationAction(_:),
+                    openingDateAction: self?.touchUpOpeningDateAction(_:)
+                )
+            }
+            .disposed(by: disposeBag)
+        
+        // navigation title
+        viewModel.changedOrderTypeTextObservable
+            .asDriver(onErrorJustReturn: "예매율순")
+            .drive(navigationItem.rx.title)
+            .disposed(by: disposeBag)
+        
+        // collectionView
+        movieCollectionView.rx
+            .setDelegate(self)
+            .disposed(by: disposeBag)
+        
+        viewModel.moviesObservable
+            .asDriver(onErrorJustReturn: [])
+            .drive(movieCollectionView.rx.items(
+                cellIdentifier: Constants.Identifier.boxOfficeCollectionViewCell,
+                cellType: BoxOfficeCollectionViewCell.self)
+            ) { index, item, cell in
+                cell.movieObserver.onNext(item)
+                cell.errorMessageObservable
+                    .observe(on: MainScheduler.instance)
+                    .bind {[weak self] error in
+                        self?.showAlert(title: "오류", message: "사진을 가져오지 못했습니다\n\(error.localizedDescription)")
+                    }
+                    .disposed(by: cell.disposeBag)
+            }
+            .disposed(by: disposeBag)
+        
+        // errorMessage
+        viewModel.errorMessageObservable
+            .map { $0.localizedDescription }
+            .observe(on: MainScheduler.instance)
+            .bind(onNext: {[weak self] error in
+                self?.showAlert(title: "오류", message: error)
+            })
+            .disposed(by: disposeBag)
+        
+        // navigation
+        viewModel.showBoxOfficeDetailViewController
+            .bind(onNext: {[weak self] movie in
+                self?.pushToBoxOfficeDetailViewController(movie: movie)
+            })
+            .disposed(by: disposeBag)
+    }
+    
     private func pushToBoxOfficeDetailViewController(movie: Movie) {
         let boxOfficeDetailViewController = BoxOfficeDetailViewController()
         boxOfficeDetailViewController.movie = movie
         navigationController?.pushViewController(boxOfficeDetailViewController, animated: true)
     }
     
-    private func fetchMovieListAndUpdateMovieOrderType(orderType: MovieOrderType) {
-        fetchMovieList(orderType: orderType)
-        updateMovieOrderType(orderType: orderType)
-    }
-    
-    @objc private func touchUpRightBarButton(_ sender: Any) {
-        DispatchQueue.main.async { [weak self] in
-            self?.showActionSheet(
-                reservationRateAction: self?.touchUpReservationRateAction,
-                curationAction: self?.touchUpCurationAction,
-                openingDateAction: self?.touchUpOpeningDateAction
-            )
-        }
-    }
-    
-    @objc private func refreshMovieCollectionView() {
-        fetchMovieListAndUpdateMovieOrderType(orderType: movieOrderType)
-    }
     
     private func touchUpReservationRateAction(_ action: UIAlertAction) {
-        fetchMovieListAndUpdateMovieOrderType(orderType: .reservationRate)
+        viewModel.changeOrderTypeObserver.onNext(.reservationRate)
+        viewModel.fetchMoviesObserver.onNext(())
     }
     
     private func touchUpCurationAction(_ action: UIAlertAction) {
-        fetchMovieListAndUpdateMovieOrderType(orderType: .curation)
+        viewModel.changeOrderTypeObserver.onNext(.curation)
+        viewModel.fetchMoviesObserver.onNext(())
     }
     
     private func touchUpOpeningDateAction(_ action: UIAlertAction) {
-        fetchMovieListAndUpdateMovieOrderType(orderType: .openingDate)
-    }
-    
-    private func updateMovieOrderType(orderType: MovieOrderType) {
-        movieOrderType = orderType
-    }
-    
-    private func fetchMovieList(orderType: MovieOrderType = .reservationRate) {
-        showNetworkActivityIndicator(isVisible: true)
-        MovieRequest.shared.sendGetMovieListRequest(orderType: orderType.rawValue) {[weak self] result in
-            switch result {
-            case .success(let data):
-                MovieData.shared.movieList = data.movies
-                DispatchQueue.main.async {
-                    self?.movieCollectionView.reloadData()
-                    self?.refreshControl.endRefreshing()
-                    self?.showNetworkActivityIndicator(isVisible: false)
-                }
-            case .failure(let error):
-                self?.showAlert(title: "오류", message: "영화 정보를 가져오지 못했습니다\nError: \(error)")
-            }
-        }
-    }
-    
-    private func showNetworkActivityIndicator(isVisible: Bool) {
-        if #available(iOS 13, *) {
-            
-        } else {
-            UIApplication.shared.isNetworkActivityIndicatorVisible = isVisible
-        }
+        viewModel.changeOrderTypeObserver.onNext(.openingDate)
+        viewModel.fetchMoviesObserver.onNext(())
     }
 }
 
 // MARK: - UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout
-extension BoxOfficeCollectionViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return MovieData.shared.movieList.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let movie = MovieData.shared.movieList[indexPath.item]
-        pushToBoxOfficeDetailViewController(movie: movie)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.Identifier.boxOfficeCollectionViewCell, for: indexPath) as? BoxOfficeCollectionViewCell else {
-            return UICollectionViewCell()
-        }
-        let movie = MovieData.shared.movieList[indexPath.item]
-        cell.movie = movie
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            if let url = movie.thumb {
-                ImageLoader(url: url).load { result in
-                    switch result {
-                    case .success(let image):
-                        DispatchQueue.main.async {
-                            cell.update(image: image)
-                        }
-                    case .failure(let error):
-                        DispatchQueue.main.async {
-                            self?.showAlert(title: "오류", message: "사진을 가져오지 못했습니다\nError: \(error)")
-                        }
-                    }
-                }
-            }
-        }
-        return cell
-    }
+extension BoxOfficeCollectionViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)

@@ -6,20 +6,44 @@
 //
 
 import Foundation
-
-enum CommentRequestError: Int, Error {
-    case unknown = -1
-    case jsonError = -2
-    case invalidArgument = -3
-    case badRequest = 400
-    case notFound = 404
-    case internalServerError = 500
-}
+import RxSwift
 
 struct CommentRequest {
     static let shared = CommentRequest()
     
-    func sendGetCommentListRequest(movieId: String, completion: @escaping (Result<CommentList, CommentRequestError>) -> Void) {
+    func getCommentListRx(movieId: String) -> Observable<CommentList> {
+        return Observable.create { observer in
+            DispatchQueue.global().async {
+                sendGetCommentListRequest(movieId: movieId) { result in
+                    switch result {
+                    case .success(let comments):
+                        observer.onNext(comments)
+                    case .failure(let error):
+                        observer.onError(error)
+                    }
+                }
+            }
+            return Disposables.create()
+        }
+    }
+    
+    func postCommentRx(comment: Comment) -> Observable<Comment> {
+        return Observable.create { observer in
+            DispatchQueue.global().async {
+                sendPostCommentRequest(comment: comment) { result in
+                    switch result {
+                    case .success(let comment):
+                        observer.onNext(comment)
+                    case .failure(let error):
+                        observer.onError(error)
+                    }
+                }
+            }
+            return Disposables.create()
+        }
+    }
+    
+    func sendGetCommentListRequest(movieId: String, completion: @escaping (Result<CommentList, RequestError>) -> Void) {
         var components = URLComponents(string: APIConstants.reviewListURL)
         let items: [URLQueryItem] = [
             URLQueryItem(name: "movie_id", value: "\(movieId)")
@@ -38,7 +62,7 @@ struct CommentRequest {
                             completion(.failure(.jsonError))
                         }
                     } else {
-                        let commentRequestError = CommentRequestError(rawValue: response.statusCode) ?? .unknown
+                        let commentRequestError = RequestError(rawValue: response.statusCode) ?? .unknown
                         completion(.failure(commentRequestError))
                     }
                 } else {
@@ -49,7 +73,7 @@ struct CommentRequest {
         }
     }
     
-    func sendPostCommentRequest(comment: Comment, completion: @escaping (Result<Comment, CommentRequestError>) -> Void) {
+    func sendPostCommentRequest(comment: Comment, completion: @escaping (Result<Comment, RequestError>) -> Void) {
         guard let url = URL(string: APIConstants.commentURL) else {
             completion(.failure(.invalidArgument))
             return
@@ -77,7 +101,7 @@ struct CommentRequest {
                             completion(.failure(.jsonError))
                         }
                     } else {
-                        let commentRequestError = CommentRequestError(rawValue: response.statusCode) ?? .unknown
+                        let commentRequestError = RequestError(rawValue: response.statusCode) ?? .unknown
                         completion(.failure(commentRequestError))
                     }
                 }

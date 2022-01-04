@@ -6,14 +6,26 @@
 //
 
 import UIKit
-
-enum ImageLoaderError: Error {
-    case unknown
-    case invalidURL
-}
+import RxSwift
 
 struct ImageLoader {
     let url: String
+    
+    func loadRx() -> Observable<UIImage> {
+        return Observable.create { observer in
+            DispatchQueue.global().async {
+                load { result in
+                    switch result {
+                    case .success(let image):
+                        observer.onNext(image)
+                    case .failure(let error):
+                        observer.onError(error)
+                    }
+                }
+            }
+            return Disposables.create()
+        }
+    }
     
     func load(completion: @escaping (Result<UIImage, ImageLoaderError>) -> Void) {
         if let url = URL(string: self.url) {

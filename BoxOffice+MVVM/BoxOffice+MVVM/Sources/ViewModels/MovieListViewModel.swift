@@ -18,6 +18,7 @@ protocol MovieListViewModelType {
     
     // Output
     var isActivatedObservable: Observable<Bool> { get }
+    var changedOrderTypeTextObservable: Observable<String> { get }
     var moviesObservable: Observable<[Movie]> { get }
     var errorMessageObservable: Observable<NSError> { get }
     
@@ -27,6 +28,7 @@ protocol MovieListViewModelType {
 
 class MovieListViewModel: MovieListViewModelType {
     
+    static let shared: MovieListViewModelType = MovieListViewModel()
     private let disposeBag: DisposeBag = DisposeBag()
     
     // Input
@@ -36,7 +38,7 @@ class MovieListViewModel: MovieListViewModelType {
     
     // Output
     let isActivatedObservable: Observable<Bool>
-    let changedOrderTypeObservable: Observable<MovieOrderType>
+    let changedOrderTypeTextObservable: Observable<String>
     let moviesObservable: Observable<[Movie]>
     let errorMessageObservable: Observable<NSError>
     
@@ -80,7 +82,9 @@ class MovieListViewModel: MovieListViewModelType {
             .distinctUntilChanged()
             .asObservable()
         
-        changedOrderTypeObservable = changeOrderType.asObservable()
+        changedOrderTypeTextObservable = changeOrderType
+            .map { $0.toKorean() }
+            .asObservable()
                 
         moviesObservable = movies.asObservable()
         

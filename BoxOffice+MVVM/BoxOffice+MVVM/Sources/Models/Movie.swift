@@ -7,6 +7,20 @@
 
 import Foundation
 
+enum MovieOrderType: Int {
+    case reservationRate = 0, curation = 1, openingDate = 2
+    func toKorean() -> String {
+        switch self {
+        case .reservationRate:
+            return "예매율순"
+        case .curation:
+            return "큐레이션"
+        case .openingDate:
+            return "개봉일순"
+        }
+    }
+}
+
 struct Movie: Codable {
     let audience: Int?
     let actor: String?

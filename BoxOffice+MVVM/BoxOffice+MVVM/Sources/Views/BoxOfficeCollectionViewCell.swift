@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 final class BoxOfficeCollectionViewCell: UICollectionViewCell {
     
@@ -62,34 +63,34 @@ final class BoxOfficeCollectionViewCell: UICollectionViewCell {
     }()
     
     // MARK: - Variables
-    var movie: Movie? {
-        didSet {
-            guard let movie = movie else { return }
-            movieGradeImageView.image = UIImage(named: movie.gradeImageName)
-            movieTitleLabel.text = movie.title
-            movieInfoLabel.text = "\(movie.reservationGrade)위(\(movie.userRating)) / \(movie.reservationRate)%"
-            movieOpeningDateLabel.text = movie.date
-        }
-    }
+    private let movie: PublishSubject<Movie> = PublishSubject<Movie>()
+    private let errorMessage: PublishSubject<NSError> = PublishSubject<NSError>()
+    
+    var movieObserver: AnyObserver<Movie> { movie.asObserver() }
+    private var errorMessageObserver: AnyObserver<NSError> { errorMessage.asObserver() }
+    
+    private var movieObservable: Observable<Movie> { movie.asObservable() }
+    var errorMessageObservable: Observable<NSError> { errorMessage.asObservable() }
+    
+    var disposeBag: DisposeBag = DisposeBag()
+    private let cellDisposeBag: DisposeBag = DisposeBag()
     
     // MARK: - LifeCycles
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
+        setupBindings()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
+        setupBindings()
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        movieImageView.image = UIImage(named: "img_placeholder")
-        movieTitleLabel.text = nil
-        movieGradeImageView.image = nil
-        movieInfoLabel.text = nil
-        movieOpeningDateLabel.text = nil
+        disposeBag = DisposeBag()
     }
     
     // MARK: - Functions
@@ -119,7 +120,28 @@ final class BoxOfficeCollectionViewCell: UICollectionViewCell {
         ])
     }
     
-    func update(image: UIImage) {
-        movieImageView.image = image
+    private func setupBindings() {
+        movieObservable
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] movie in
+                self?.movieTitleLabel.text = movie.title
+                self?.movieGradeImageView.image = UIImage(named: movie.gradeImageName)
+                self?.movieInfoLabel.text = "\(movie.reservationGrade)위(\(movie.userRating)) / \(movie.reservationRate)%"
+                self?.movieOpeningDateLabel.text = movie.date
+            }
+            .disposed(by: cellDisposeBag)
+        
+        movieObservable
+            .flatMap { movie in
+                ImageLoader(url: movie.thumb ?? "").loadRx()
+            }
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] image in
+                self?.movieImageView.image = image
+            }, onError: { [weak self] error in
+                self?.errorMessageObserver.onNext(error as NSError)
+            })
+            .disposed(by: cellDisposeBag)
     }
+
 }

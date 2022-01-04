@@ -1,0 +1,90 @@
+//
+//  CommentRequest.swift
+//  BoostCourse5
+//
+//  Created by Haeseok Lee on 2021/08/25.
+//
+
+import Foundation
+
+enum CommentRequestError: Int, Error {
+    case unknown = -1
+    case jsonError = -2
+    case invalidArgument = -3
+    case badRequest = 400
+    case notFound = 404
+    case internalServerError = 500
+}
+
+struct CommentRequest {
+    static let shared = CommentRequest()
+    
+    func sendGetCommentListRequest(movieId: String, completion: @escaping (Result<CommentList, CommentRequestError>) -> Void) {
+        var components = URLComponents(string: APIConstants.reviewListURL)
+        let items: [URLQueryItem] = [
+            URLQueryItem(name: "movie_id", value: "\(movieId)")
+        ]
+        
+        components?.queryItems = items
+        
+        if let url = components?.url {
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                if let data = data, let response = response as? HTTPURLResponse {
+                    if response.statusCode == 200 {
+                        do {
+                            let json = try JSONDecoder().decode(CommentList.self, from: data)
+                            completion(.success(json))
+                        } catch {
+                            completion(.failure(.jsonError))
+                        }
+                    } else {
+                        let commentRequestError = CommentRequestError(rawValue: response.statusCode) ?? .unknown
+                        completion(.failure(commentRequestError))
+                    }
+                } else {
+                    completion(.failure(.unknown))
+                }
+            }
+            task.resume()
+        }
+    }
+    
+    func sendPostCommentRequest(comment: Comment, completion: @escaping (Result<Comment, CommentRequestError>) -> Void) {
+        guard let url = URL(string: APIConstants.commentURL) else {
+            completion(.failure(.invalidArgument))
+            return
+        }
+        
+        var json: [String: Any] = [:]
+        json["rating"] = comment.rating
+        json["writer"] = comment.writer
+        json["movie_id"] = comment.movieId
+        json["contents"] = comment.contents
+        
+        do {
+            let data = try JSONSerialization.data(withJSONObject: json, options: [])
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = data
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let data = data, let response = response as? HTTPURLResponse {
+                    if response.statusCode == 201 {
+                        do {
+                            let data = try JSONDecoder().decode(Comment.self, from: data)
+                            completion(.success(data))
+                        } catch {
+                            completion(.failure(.jsonError))
+                        }
+                    } else {
+                        let commentRequestError = CommentRequestError(rawValue: response.statusCode) ?? .unknown
+                        completion(.failure(commentRequestError))
+                    }
+                }
+            }
+            task.resume()
+        } catch {
+            completion(.failure(.jsonError))
+        }
+    }
+}

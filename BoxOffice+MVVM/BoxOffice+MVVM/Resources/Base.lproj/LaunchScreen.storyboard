@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="u1j-qV-nYg">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="mp0-IU-pTe">
+            <objects>
+                <viewController id="u1j-qV-nYg" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="0Q4-Q5-a0f">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="img_splash" translatesAutoresizingMaskIntoConstraints="NO" id="HOZ-8h-gji">
+                                <rect key="frame" x="125" y="194" width="164" height="163.5"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="HOZ-8h-gji" secondAttribute="height" multiplier="1:1" id="zzO-j2-X51"/>
+                                </constraints>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Connect_logo_w" translatesAutoresizingMaskIntoConstraints="NO" id="nHB-e0-mCI">
+                                <rect key="frame" x="125" y="738.5" width="164" height="23.5"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="nHB-e0-mCI" secondAttribute="height" multiplier="140:20" id="Ucy-0g-xq2"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="yhG-c0-UVa"/>
+                        <color key="backgroundColor" name="app_purple"/>
+                        <constraints>
+                            <constraint firstItem="nHB-e0-mCI" firstAttribute="width" secondItem="HOZ-8h-gji" secondAttribute="width" id="KOJ-eG-Etw"/>
+                            <constraint firstItem="HOZ-8h-gji" firstAttribute="centerX" secondItem="yhG-c0-UVa" secondAttribute="centerX" id="Mpg-BE-oIr"/>
+                            <constraint firstItem="nHB-e0-mCI" firstAttribute="top" relation="greaterThanOrEqual" secondItem="HOZ-8h-gji" secondAttribute="bottom" constant="100" id="ac8-S3-fkd"/>
+                            <constraint firstItem="yhG-c0-UVa" firstAttribute="bottom" secondItem="nHB-e0-mCI" secondAttribute="bottom" constant="100" id="dXy-X8-y27"/>
+                            <constraint firstItem="nHB-e0-mCI" firstAttribute="centerX" secondItem="yhG-c0-UVa" secondAttribute="centerX" id="fCV-jU-Qwv"/>
+                            <constraint firstItem="HOZ-8h-gji" firstAttribute="height" secondItem="yhG-c0-UVa" secondAttribute="height" multiplier="0.2" id="ykS-30-VlV"/>
+                            <constraint firstItem="HOZ-8h-gji" firstAttribute="top" secondItem="yhG-c0-UVa" secondAttribute="top" constant="150" id="zm8-BS-F55"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="LT4-OK-w14" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="53" y="375"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="Connect_logo_w" width="139" height="20"/>
+        <image name="img_splash" width="138" height="138"/>
+        <namedColor name="app_purple">
+            <color red="0.31372549019607843" green="0.43137254901960786" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

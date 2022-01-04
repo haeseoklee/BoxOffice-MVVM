@@ -18,3 +18,17 @@ enum APIConstants {
     
     static let commentURL = baseURL + "comment"
 }
+
+enum RequestError: Int, Error {
+    case unknown = -1
+    case jsonError = -2
+    case invalidArgument = -3
+    case badRequest = 400
+    case notFound = 404
+    case internalServerError = 500
+}
+
+enum ImageLoaderError: Error {
+    case unknown
+    case invalidURL
+}

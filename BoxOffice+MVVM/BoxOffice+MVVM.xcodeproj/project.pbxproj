@@ -38,6 +38,7 @@
 		1C4A71DF27843EB60017E326 /* APIConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71DD27843EB60017E326 /* APIConstants.swift */; };
 		1C4A71E127843EC30017E326 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C4A71E027843EC30017E326 /* Assets.xcassets */; };
 		1C4A71E3278472220017E326 /* BoxOffice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71E2278472220017E326 /* BoxOffice.swift */; };
+		1C4A71E527847C600017E326 /* MovieListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4A71E427847C600017E326 /* MovieListViewModel.swift */; };
 		497760001515600737846A2B /* Pods_BoxOffice_MVVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EB8BC482C4642594ADE5244 /* Pods_BoxOffice_MVVM.framework */; };
 /* End PBXBuildFile section */
 
@@ -75,6 +76,7 @@
 		1C4A71DD27843EB60017E326 /* APIConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIConstants.swift; sourceTree = "<group>"; };
 		1C4A71E027843EC30017E326 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1C4A71E2278472220017E326 /* BoxOffice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxOffice.swift; sourceTree = "<group>"; };
+		1C4A71E427847C600017E326 /* MovieListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListViewModel.swift; sourceTree = "<group>"; };
 		6EB8BC482C4642594ADE5244 /* Pods_BoxOffice_MVVM.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BoxOffice_MVVM.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F3D81117C68665DAB38159B /* Pods-BoxOffice+MVVM.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BoxOffice+MVVM.release.xcconfig"; path = "Target Support Files/Pods-BoxOffice+MVVM/Pods-BoxOffice+MVVM.release.xcconfig"; sourceTree = "<group>"; };
 		A11B79C7584ACD998B5D89C9 /* Pods-BoxOffice+MVVM.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BoxOffice+MVVM.debug.xcconfig"; path = "Target Support Files/Pods-BoxOffice+MVVM/Pods-BoxOffice+MVVM.debug.xcconfig"; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 		1C4A71A527842F360017E326 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				1C4A71E427847C600017E326 /* MovieListViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -381,6 +384,7 @@
 				1C4A71B827843DFF0017E326 /* SceneDelegate.swift in Sources */,
 				1C4A71DA27843E820017E326 /* BoxOfficeDetailReviewHeaderView.swift in Sources */,
 				1C4A71DE27843EB60017E326 /* Constants.swift in Sources */,
+				1C4A71E527847C600017E326 /* MovieListViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

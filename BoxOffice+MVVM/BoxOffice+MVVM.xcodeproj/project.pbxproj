@@ -169,8 +169,8 @@
 			isa = PBXGroup;
 			children = (
 				1C4A71BB27843E440017E326 /* CommentRequest.swift */,
-				1C4A71BA27843E440017E326 /* MovieRequest.swift */,
 				1C4A71BC27843E440017E326 /* ImageLoader.swift */,
+				1C4A71BA27843E440017E326 /* MovieRequest.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";

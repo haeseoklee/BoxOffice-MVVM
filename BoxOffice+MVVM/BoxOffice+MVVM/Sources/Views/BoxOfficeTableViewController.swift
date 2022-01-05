@@ -165,17 +165,14 @@ final class BoxOfficeTableViewController: UIViewController {
     
     private func touchUpReservationRateAction(_ alertAction: UIAlertAction) {
         viewModel.changeOrderTypeObserver.onNext(.reservationRate)
-        viewModel.fetchMoviesObserver.onNext(())
     }
     
     private func touchUpCurationAction(_ alertAction: UIAlertAction) {
         viewModel.changeOrderTypeObserver.onNext(.curation)
-        viewModel.fetchMoviesObserver.onNext(())
     }
     
     private func touchUpOpeningDateAction(_ alertAction: UIAlertAction) {
         viewModel.changeOrderTypeObserver.onNext(.openingDate)
-        viewModel.fetchMoviesObserver.onNext(())
     }
 }
 

@@ -13,14 +13,12 @@ struct MovieRequest {
     
     func getMovieListRx(orderType: Int) -> Observable<MovieList> {
         return Observable.create { observer in
-            DispatchQueue.global().async {
-                sendGetMovieListRequest(orderType: orderType) { result in
-                    switch result {
-                    case .success(let movies):
-                        observer.onNext(movies)
-                    case .failure(let error):
-                        observer.onError(error)
-                    }
+            sendGetMovieListRequest(orderType: orderType) { result in
+                switch result {
+                case .success(let movies):
+                    observer.onNext(movies)
+                case .failure(let error):
+                    observer.onError(error)
                 }
             }
             return Disposables.create()
@@ -29,14 +27,12 @@ struct MovieRequest {
     
     func getMovieRx(id: String) -> Observable<Movie> {
         return Observable.create { observer in
-            DispatchQueue.global().async {
-                sendGetMovieRequest(id: id) { result in
-                    switch result {
-                    case .success(let movie):
-                        observer.onNext(movie)
-                    case .failure(let error):
-                        observer.onError(error)
-                    }
+            sendGetMovieRequest(id: id) { result in
+                switch result {
+                case .success(let movie):
+                    observer.onNext(movie)
+                case .failure(let error):
+                    observer.onError(error)
                 }
             }
             return Disposables.create()

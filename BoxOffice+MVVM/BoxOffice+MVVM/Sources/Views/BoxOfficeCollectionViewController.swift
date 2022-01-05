@@ -178,7 +178,8 @@ final class BoxOfficeCollectionViewController: UIViewController {
     
     private func pushToBoxOfficeDetailViewController(movie: Movie) {
         let boxOfficeDetailViewController = BoxOfficeDetailViewController()
-        boxOfficeDetailViewController.viewModel = MovieViewModel(selectedMovie: movie)
+        boxOfficeDetailViewController.commentListViewModel = CommentListViewModel(movie: movie)
+        boxOfficeDetailViewController.movieViewModel = MovieViewModel(selectedMovie: movie)
         navigationController?.pushViewController(boxOfficeDetailViewController, animated: true)
     }
     

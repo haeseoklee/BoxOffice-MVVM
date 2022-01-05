@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 final class BoxOfficeDetailSummaryHeaderView: UITableViewHeaderFooterView {
     
@@ -35,21 +37,23 @@ final class BoxOfficeDetailSummaryHeaderView: UITableViewHeaderFooterView {
     }()
     
     // MARK: - Variables
-    var movie: Movie? {
-        didSet {
-            summaryTextLabel.text = movie?.synopsis
-        }
-    }
+    private let movie: PublishSubject<Movie> = PublishSubject<Movie>()
+    var movieObserver: AnyObserver<Movie> { movie.asObserver() }
+
+    var disposeBag: DisposeBag = DisposeBag()
+    private let cellDisposeBag: DisposeBag = DisposeBag()
     
     // MARK: - Life Cycles
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
         setupViews()
+        setupBindings()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
+        setupBindings()
     }
     
     // MARK: - Functions
@@ -77,5 +81,15 @@ final class BoxOfficeDetailSummaryHeaderView: UITableViewHeaderFooterView {
             summaryTextLabel.topAnchor.constraint(equalTo: summaryTitleLabel.bottomAnchor, constant: 10),
             summaryTextLabel.bottomAnchor.constraint(lessThanOrEqualTo: summaryView.bottomAnchor, constant: -10)
         ])
+    }
+    
+    private func setupBindings() {
+        movie
+            .map { $0.synopsis }
+            .flatMap { Observable.from(optional: $0) }
+            .observe(on: MainScheduler.instance)
+            .asDriver(onErrorJustReturn: "")
+            .drive(summaryTextLabel.rx.text)
+            .disposed(by: cellDisposeBag)
     }
 }

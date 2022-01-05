@@ -6,18 +6,15 @@
 //
 
 import UIKit
-
-protocol BoxOfficeHeaderDelegate: AnyObject {
-    func touchUpMovieImageView(image: UIImage?)
-}
+import RxSwift
+import RxCocoa
+import RxGesture
 
 final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
     
     // MARK: - Views
     private lazy var movieImageView: UIImageView = {
         let imageView = UIImageView()
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(touchUpMovieImageView))
-        imageView.addGestureRecognizer(tapGesture)
         imageView.image = UIImage(named: "img_placeholder")
         imageView.isUserInteractionEnabled = true
         imageView.contentMode = .scaleAspectFit
@@ -233,37 +230,33 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
     }()
     
     // MARK: - Variables
-    var movie: Movie? {
-        didSet {
-            guard let movie = movie else { return }
-            movieTitleLabel.text = movie.title
-            movieGradeImageView.image = UIImage(named: movie.gradeImageName)
-            movieOpeningDateLabel.text = "\(movie.date) 개봉"
-            movieGenreAndRunningTimeLabel.text = "\(movie.genre ?? "")/\(movie.duration ?? 0)분"
-            movieReservationLabel.text = "\(movie.reservationGrade)위 \(movie.reservationRate)%"
-            movieRateLabel.text = "\(movie.userRating)"
-            movieAttendanceLabel.text = movie.audience?.intWithCommas()
-            movieStarRatingBarView.updateStarImageViews(userRating: movie.userRating)
-        }
-    }
+    private let movie: PublishSubject<Movie> = PublishSubject<Movie>()
+    private let movieImage: PublishSubject<UIImage> = PublishSubject<UIImage>()
+    private let touchMovieImage: PublishSubject<Void> = PublishSubject<Void>()
     
-    var image: UIImage? {
-        didSet {
-            movieImageView.image = image
-        }
-    }
+    var movieObserver: AnyObserver<Movie> { movie.asObserver() }
+    var movieImageObserver: AnyObserver<UIImage> { movieImage.asObserver() }
+    var touchMovieObservable: Observable<Void> { touchMovieImage.asObservable() }
     
-    weak var boxOfficeHeaderDelegate: BoxOfficeHeaderDelegate?
+    var disposeBag: DisposeBag = DisposeBag()
+    private let cellDisposeBag: DisposeBag = DisposeBag()
     
     // MARK: - Life Cycles
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
         setupViews()
+        setupBindings()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
+        setupBindings()
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
     }
     
     // MARK: - Functions
@@ -319,8 +312,31 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
         ])
     }
     
-    @objc
-    private func touchUpMovieImageView() {
-        boxOfficeHeaderDelegate?.touchUpMovieImageView(image: movieImageView.image)
+    private func setupBindings() {
+        
+        movie
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] movie in
+                self?.movieTitleLabel.text = movie.title
+                self?.movieGradeImageView.image = UIImage(named: movie.gradeImageName)
+                self?.movieOpeningDateLabel.text = "\(movie.date) 개봉"
+                self?.movieGenreAndRunningTimeLabel.text = "\(movie.genre ?? "")/\(movie.duration ?? 0)분"
+                self?.movieReservationLabel.text = "\(movie.reservationGrade)위 \(movie.reservationRate)%"
+                self?.movieRateLabel.text = "\(movie.userRating)"
+                self?.movieAttendanceLabel.text = movie.audience?.intWithCommas()
+                self?.movieStarRatingBarView.updateStarImageViews(userRating: movie.userRating)
+            }
+            .disposed(by: cellDisposeBag)
+
+        movieImage
+            .asDriver(onErrorJustReturn: UIImage())
+            .drive(movieImageView.rx.image)
+            .disposed(by: cellDisposeBag)
+
+        movieImageView.rx
+            .tapGesture()
+            .map { _ in ()}
+            .bind(to: touchMovieImage)
+            .disposed(by: cellDisposeBag)
     }
 }

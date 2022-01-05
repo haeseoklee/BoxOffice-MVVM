@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RxSwift
 
 final class MovieImageDetailViewController: UIViewController {
     
@@ -28,18 +29,21 @@ final class MovieImageDetailViewController: UIViewController {
     }()
     
     // MARK: - Variables
-    var movieImage: UIImage?
+    private let movie: PublishSubject<UIImage> = PublishSubject<UIImage>()
+    var movieObserver: AnyObserver<UIImage> { movie.asObserver() }
+    
+    private let disposeBag: DisposeBag = DisposeBag()
 
     // MARK: - Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         initViews()
         setupViews()
+        setupBindings()
     }
     
     private func initViews() {
         view.backgroundColor = .black
-        movieImageView.image = movieImage
     }
     
     // MARK: - Functions
@@ -60,6 +64,13 @@ final class MovieImageDetailViewController: UIViewController {
             movieImageView.widthAnchor.constraint(equalTo: movieImageScrollView.frameLayoutGuide.widthAnchor),
             movieImageView.heightAnchor.constraint(equalTo: movieImageScrollView.frameLayoutGuide.heightAnchor)
         ])
+    }
+    
+    private func setupBindings() {
+        movie
+            .asDriver(onErrorJustReturn: UIImage(named: "img_placeholder") ?? UIImage())
+            .drive(movieImageView.rx.image)
+            .disposed(by: disposeBag)
     }
 }
 

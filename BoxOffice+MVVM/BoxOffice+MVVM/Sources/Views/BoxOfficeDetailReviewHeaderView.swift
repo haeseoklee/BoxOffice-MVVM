@@ -6,10 +6,8 @@
 //
 
 import UIKit
-
-protocol BoxOfficeDetailReviewHeaderDelegate: AnyObject {
-    func touchReviewWriteButton()
-}
+import RxSwift
+import RxCocoa
 
 final class BoxOfficeDetailReviewHeaderView: UITableViewHeaderFooterView {
     
@@ -25,7 +23,6 @@ final class BoxOfficeDetailReviewHeaderView: UITableViewHeaderFooterView {
     
     private lazy var reviewWriteButton: UIButton = {
         let button = UIButton()
-        button.addTarget(self, action: #selector(touchUpReviewWriteButton), for: .touchUpInside)
         button.setImage(UIImage(named: "btn_compose"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -42,17 +39,23 @@ final class BoxOfficeDetailReviewHeaderView: UITableViewHeaderFooterView {
     }()
     
     // MARK: - Variables
-    weak var boxOfficeDetailReviewHeaderDelegate: BoxOfficeDetailReviewHeaderDelegate?
+    private let touchReviewWriteButton: PublishSubject<Void> = PublishSubject<Void>()
+    var touchReviewWriteButtonObservable: Observable<Void> { touchReviewWriteButton.asObservable() }
+
+    var disposeBag: DisposeBag = DisposeBag()
+    private let cellDisposeBag: DisposeBag = DisposeBag()
     
     // MARK: - Life Cycles
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
         setupViews()
+        setupBindings()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupViews()
+        setupBindings()
     }
     
     // MARK: - Functions
@@ -72,8 +75,10 @@ final class BoxOfficeDetailReviewHeaderView: UITableViewHeaderFooterView {
         ])
     }
     
-    @objc
-    private func touchUpReviewWriteButton() {
-        boxOfficeDetailReviewHeaderDelegate?.touchReviewWriteButton()
+    private func setupBindings() {
+        reviewWriteButton.rx.tap
+            .map { _ in () }
+            .bind(to: touchReviewWriteButton)
+            .disposed(by: cellDisposeBag)
     }
 }

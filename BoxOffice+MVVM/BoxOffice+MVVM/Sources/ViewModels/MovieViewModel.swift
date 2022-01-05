@@ -9,128 +9,118 @@ import Foundation
 import RxSwift
 
 protocol MovieViewModelType {
+    
     // Input
+    var fetchMovieObserver: AnyObserver<Void> { get }
+    var fetchMovieImageObserver: AnyObserver<Void> { get }
     var touchMovieImageObserver: AnyObserver<Void> { get }
     var touchReviewWriteButtonObserver: AnyObserver<Void> { get }
     
     // Output
+    var isActivatedObservable: Observable<Bool> { get }
+    var movieObservable: Observable<Movie> { get }
     var movieImageObservable: Observable<UIImage> { get }
-    var movieTitleTextObservable: Observable<String> { get }
-    var movieGradeImageObservable: Observable<UIImage> { get }
-    var movieOpeningDateTextObservable: Observable<String> { get }
-    var movieGenreDurationTextObservable: Observable<String> { get }
-    var movieReservationTextObservable: Observable<String> { get }
-    var movieRateTextObservable: Observable<String> { get }
-    var movieAttendenceTextObservable: Observable<String> { get }
-    var movieSynopsisTextObservable: Observable<String> { get }
-    var movieDirectorTextObservable: Observable<String> { get }
-    var movieActorTextObservable: Observable<String> { get }
     var errorMessageObservable: Observable<NSError> { get }
     
     // Navigation
     var showMovieImageDetailViewController: Observable<UIImage> { get }
-    var showBoxOfficeReviewWriteViewController: Observable<Void> { get }
-    
+    var showBoxOfficeReviewWriteViewController: Observable<Movie> { get }
 }
 
 class MovieViewModel: MovieViewModelType {
     
-    private var disposeBag: DisposeBag = DisposeBag()
+    private let disposeBag: DisposeBag = DisposeBag()
     
     // Input
+    let fetchMovieObserver: AnyObserver<Void>
+    let fetchMovieImageObserver: AnyObserver<Void>
     let touchMovieImageObserver: AnyObserver<Void>
     let touchReviewWriteButtonObserver: AnyObserver<Void>
     
     // Output
+    let isActivatedObservable: Observable<Bool>
+    let movieObservable: Observable<Movie>
     let movieImageObservable: Observable<UIImage>
-    let movieTitleTextObservable: Observable<String>
-    let movieGradeImageObservable: Observable<UIImage>
-    let movieOpeningDateTextObservable: Observable<String>
-    let movieGenreDurationTextObservable: Observable<String>
-    let movieReservationTextObservable: Observable<String>
-    let movieRateTextObservable: Observable<String>
-    let movieAttendenceTextObservable: Observable<String>
-    let movieSynopsisTextObservable: Observable<String>
-    let movieDirectorTextObservable: Observable<String>
-    let movieActorTextObservable: Observable<String>
     let errorMessageObservable: Observable<NSError>
     
     // Navigation
     let showMovieImageDetailViewController: Observable<UIImage>
-    let showBoxOfficeReviewWriteViewController: Observable<Void>
+    let showBoxOfficeReviewWriteViewController: Observable<Movie>
     
-    init(selectedMovie: Movie) {
+    init(selectedMovie: Movie = Movie.empty, domain: BoxOfficeType = BoxOffice()) {
         
+        let fetchMovie = PublishSubject<Void>()
+        let fetchMovieImage = PublishSubject<Void>()
         let touchMovieImage = PublishSubject<Void>()
         let touchReviewWriteButton = PublishSubject<Void>()
+        
+        let isActivated = BehaviorSubject<Bool>(value: false)
         let movie = BehaviorSubject<Movie>(value: selectedMovie)
+        let movieImage = BehaviorSubject<UIImage>(value: UIImage(named: "img_placeholder") ?? UIImage())
         let errorMessage = PublishSubject<NSError>()
         
         // Input
+        fetchMovieObserver = fetchMovie.asObserver()
+        fetchMovieImageObserver = fetchMovieImage.asObserver()
         touchMovieImageObserver = touchMovieImage.asObserver()
         touchReviewWriteButtonObserver = touchReviewWriteButton.asObserver()
         
+        fetchMovie
+            .withLatestFrom(movie)
+            .flatMap { Observable.from(optional: $0.id) }
+            .flatMap { id -> Observable<Movie> in
+                isActivated.onNext(true)
+                return domain.getMovie(id: id)
+            }
+            .subscribe(onNext: { fetchedMovie in
+                movie.onNext(fetchedMovie)
+                isActivated.onNext(false)
+            }, onError: { error in
+                errorMessage.onNext(error as NSError)
+            })
+            .disposed(by: disposeBag)
+        
+        
+        fetchMovieImage
+            .withLatestFrom(movie)
+            .distinctUntilChanged({ $0.image ?? "" })
+            .flatMap { movie -> Observable<String> in
+                isActivated.onNext(true)
+                return Observable.from(optional: movie.image)
+            }
+            .flatMap {
+                ImageLoader(url: $0).loadRx()
+            }
+            .subscribe(onNext: { image in
+                isActivated.onNext(false)
+                movieImage.onNext(image)
+            }, onError: { error in
+                errorMessage.onNext(error as NSError)
+            })
+            .disposed(by: disposeBag)
+        
+        
         // Output
-        movieImageObservable = movie
-            .map { $0.image }
-            .flatMap { Observable.from(optional: $0) }
-            .flatMap { ImageLoader(url: $0).loadRx() }
+        isActivatedObservable = isActivated
             .asObservable()
         
-        movieTitleTextObservable = movie
-            .map { $0.title }
+        movieObservable = movie
             .asObservable()
         
-        movieGradeImageObservable = movie
-            .map { UIImage(named: $0.gradeImageName) }
-            .flatMap { Observable.from(optional: $0) }
-            .asObservable()
-            
-        movieOpeningDateTextObservable = movie
-            .map { "\($0.date) 개봉" }
-            .asObservable()
-        
-        movieGenreDurationTextObservable = movie
-            .map { "\($0.genre ?? "")/\($0.duration ?? 0)분" }
-            .asObservable()
-        
-        movieReservationTextObservable = movie
-            .map { "\($0.reservationGrade)위 \($0.reservationRate)%" }
-            .asObservable()
-        
-        movieRateTextObservable = movie
-            .map { "\($0.userRating)" }
-            .asObservable()
-        
-        movieAttendenceTextObservable = movie
-            .map { $0.audience?.intWithCommas() }
-            .flatMap { Observable.from(optional: $0) }
-            .asObservable()
-        
-        movieSynopsisTextObservable = movie
-            .map { $0.synopsis }
-            .flatMap { Observable.from(optional: $0) }
-            .asObservable()
-        
-        movieDirectorTextObservable = movie
-            .map { $0.director }
-            .flatMap { Observable.from(optional: $0) }
-            .asObservable()
-        
-        movieActorTextObservable = movie
-            .map { $0.actor }
-            .flatMap { Observable.from(optional: $0) }
+        movieImageObservable = movieImage
             .asObservable()
         
         errorMessageObservable = errorMessage
             .map { $0 as NSError }
             .asObservable()
         
+        // Navigation
         showMovieImageDetailViewController = touchMovieImage
-            .withLatestFrom(movieImageObservable)
+            .withLatestFrom(movieImage)
             .asObservable()
         
         showBoxOfficeReviewWriteViewController = touchReviewWriteButton
+            .withLatestFrom(movie)
             .asObservable()
     }
 }

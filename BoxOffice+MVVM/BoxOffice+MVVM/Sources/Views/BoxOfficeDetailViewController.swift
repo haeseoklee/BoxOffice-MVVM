@@ -30,17 +30,22 @@ final class BoxOfficeDetailViewController: UIViewController {
     }()
     
     // MARK: - Variables
-    var viewModel: MovieViewModelType
+    var movieViewModel: MovieViewModelType
+    var commentListViewModel: CommentListViewModelType
+    private var comments: [Comment] = []
     private var disposeBag: DisposeBag = DisposeBag()
     
     // MARK: - Life Cycles
-    init(viewModel: MovieViewModelType = MovieViewModel()) {
-        self.viewModel = viewModel
+    init(movieViewModel: MovieViewModelType = MovieViewModel(),
+         commentListViewModel: CommentListViewModelType = CommentListViewModel()) {
+        self.movieViewModel = movieViewModel
+        self.commentListViewModel = commentListViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
-        self.viewModel = MovieViewModel()
+        movieViewModel = MovieViewModel()
+        commentListViewModel = CommentListViewModel()
         super.init(coder: coder)
     }
     
@@ -66,7 +71,7 @@ final class BoxOfficeDetailViewController: UIViewController {
     private func setupNavigationBar() {
         navigationController?.navigationBar.tintColor = .white
         
-        viewModel.movieObservable
+        movieViewModel.movieObservable
             .map { $0.title }
             .asDriver(onErrorJustReturn: "")
             .drive(navigationItem.rx.title)
@@ -75,14 +80,18 @@ final class BoxOfficeDetailViewController: UIViewController {
     
     private func setupBindings() {
         
-        // fetch movie
+        // Fetch movie
         let viewWillAppearOnce = rx.viewWillAppear.take(1).map { _ in () }
         viewWillAppearOnce
-            .bind(to: viewModel.fetchMovieObserver)
+            .bind(to: movieViewModel.fetchMovieObserver)
             .disposed(by: disposeBag)
         
-        // tableView
-        // TODO: commentlistViewModel과 연결하기
+        // Fetch comment list
+        viewWillAppearOnce
+            .bind(to: commentListViewModel.fetchCommentsObserver)
+            .disposed(by: disposeBag)
+        
+        // TableView
         movieDetailTableView.rx
             .setDelegate(self)
             .disposed(by: disposeBag)
@@ -91,8 +100,16 @@ final class BoxOfficeDetailViewController: UIViewController {
             .setDataSource(self)
             .disposed(by: disposeBag)
         
+        commentListViewModel
+            .commentsObservable
+            .bind {[weak self] comments in
+                self?.comments = comments
+            }
+            .disposed(by: disposeBag)
+        
         // NetworkActivityIndicator
-        viewModel.isActivatedObservable
+        Observable
+            .merge(movieViewModel.isActivatedObservable, commentListViewModel.isActivatedObservable)
             .observe(on: MainScheduler.instance)
             .bind {[weak self] isActivated in
                 if #available(iOS 13.0, *) {
@@ -104,38 +121,29 @@ final class BoxOfficeDetailViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
+        // Error message
+        Observable
+            .merge(movieViewModel.errorMessageObservable, commentListViewModel.errorMessageObservable)
+            .map { $0.localizedDescription }
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] message in
+                self?.showAlert(title: "오류", message: message)
+            }
+            .disposed(by: disposeBag)
+        
         // Navigation
-        viewModel.showMovieImageDetailViewController
+        movieViewModel.showMovieImageDetailViewController
             .subscribe(onNext: {[weak self] image in
                 self?.presentMovieImageDetailViewController(image: image)
             })
             .disposed(by: disposeBag)
         
-        viewModel.showBoxOfficeReviewWriteViewController
+        movieViewModel.showBoxOfficeReviewWriteViewController
             .subscribe(onNext: {[weak self] movie in
                 self?.presentBoxOfficeReviewWriteViewController(movie: movie)
             })
             .disposed(by: disposeBag)
     }
-
-//    private func fetchCommentList(movie: Movie?) {
-//        guard let movieId = movie?.id else { return }
-//        showNetworkActivityIndicator(isVisible: true)
-//        CommentRequest.shared.sendGetCommentListRequest(movieId: movieId) {[weak self] result in
-//            switch result {
-//            case .success(let data):
-//                self?.commentList = data.comments
-//                DispatchQueue.main.async {
-//                    self?.movieDetailTableView.reloadData()
-//                    self?.showNetworkActivityIndicator(isVisible: false)
-//                }
-//            case .failure(let error):
-//                DispatchQueue.main.async {
-//                    self?.showAlert(title: "오류", message: "코멘트를 가져오지 못했습니다\nError: \(error)")
-//                }
-//            }
-//        }
-//    }
     
     private func presentBoxOfficeReviewWriteViewController(movie: Movie?) {
         let boxOfficeReviewWriteViewController = BoxOfficeReviewWriteViewController()
@@ -154,7 +162,6 @@ final class BoxOfficeDetailViewController: UIViewController {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSource {
 
-    
     func numberOfSections(in tableView: UITableView) -> Int {
         return MovieDetailTableViewSection.allCases.count
     }
@@ -162,8 +169,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let sectionKind = MovieDetailTableViewSection(rawValue: section)
         if sectionKind == .comment {
-//            return commentList.count
-            return 0
+            return comments.count
         }
         return 0
     }
@@ -177,7 +183,8 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
             ) as? BoxOfficeDetailTableViewCell else {
                 return UITableViewCell()
             }
-//            cell.comment = commentList[indexPath.item]
+            let item = comments[indexPath.row]
+            cell.commentObserver.onNext(item)
             return cell
         }
         return UITableViewCell()
@@ -191,18 +198,18 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
             guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.boxOfficeDetailHeaderView) as? BoxOfficeDetailHeaderView else {
                 return defaultHeaderView
             }
-            viewModel.movieObservable
+            movieViewModel.fetchMovieImageObserver.onNext(())
+            
+            movieViewModel.movieObservable
                 .bind(to: headerView.movieObserver)
                 .disposed(by: headerView.disposeBag)
             
-            viewModel.fetchMovieImageObserver.onNext(())
-            
-            viewModel.movieImageObservable
+            movieViewModel.movieImageObservable
                 .bind(to: headerView.movieImageObserver)
                 .disposed(by: headerView.disposeBag)
             
             headerView.touchMovieObservable
-                .bind(to: viewModel.touchMovieImageObserver)
+                .bind(to: movieViewModel.touchMovieImageObserver)
                 .disposed(by: headerView.disposeBag)
             
             return headerView
@@ -210,7 +217,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
             guard let summaryView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.boxOfficeDetailSummaryHeaderView) as? BoxOfficeDetailSummaryHeaderView else {
                 return defaultHeaderView
             }
-            viewModel.movieObservable
+            movieViewModel.movieObservable
                 .bind(to: summaryView.movieObserver)
                 .disposed(by: summaryView.disposeBag)
             return summaryView
@@ -218,7 +225,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
             guard let infoView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.boxOfficeDetailInfoHeaderView) as? BoxOfficeDetailInfoHeaderView else {
                 return defaultHeaderView
             }
-            viewModel.movieObservable
+            movieViewModel.movieObservable
                 .bind(to: infoView.movieObserver)
                 .disposed(by: infoView.disposeBag)
             return infoView
@@ -227,7 +234,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
                 return defaultHeaderView
             }
             reviewView.touchReviewWriteButtonObservable
-                .bind(to: viewModel.touchReviewWriteButtonObserver)
+                .bind(to: movieViewModel.touchReviewWriteButtonObserver)
                 .disposed(by: reviewView.disposeBag)
             return reviewView
         default:

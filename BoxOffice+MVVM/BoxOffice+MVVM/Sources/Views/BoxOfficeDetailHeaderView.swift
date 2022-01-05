@@ -113,9 +113,28 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
         return label
     }()
     
-    private let movieRateTitleLabel: UILabel = {
+    private let movieReservationTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "예매율"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        label.adjustsFontForContentSizeCategory = true
+        label.accessibilityIdentifier = "movieReservationTitleLabel"
+        label.translatesAutoresizingMaskIntoConstraints = true
+        return label
+    }()
+    
+    private let movieReservationLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.adjustsFontForContentSizeCategory = true
+        label.accessibilityIdentifier = "movieReservationLabel"
+        label.translatesAutoresizingMaskIntoConstraints = true
+        return label
+    }()
+    
+    private let movieRateTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "평점"
         label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         label.adjustsFontForContentSizeCategory = true
         label.accessibilityIdentifier = "movieRateTitleLabel"
@@ -132,23 +151,11 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
         return label
     }()
     
-    private let movieReservationTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "평점"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        label.adjustsFontForContentSizeCategory = true
-        label.accessibilityIdentifier = "movieReservationTitleLabel"
-        label.translatesAutoresizingMaskIntoConstraints = true
-        return label
-    }()
-    
-    private let movieReservationLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.adjustsFontForContentSizeCategory = true
-        label.accessibilityIdentifier = "movieReservationLabel"
-        label.translatesAutoresizingMaskIntoConstraints = true
-        return label
+    private let movieStarRatingBarView: StarRatingBarView = {
+        let view = StarRatingBarView(isEnabled: false, userRating: 0)
+        view.accessibilityIdentifier = "movieStarRatingBarView"
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
     private let movieAttendanceTitleLabel: UILabel = {
@@ -170,17 +177,6 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
         return label
     }()
     
-    private let movieRateStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.distribution = .fill
-        stackView.spacing = 15
-        stackView.accessibilityIdentifier = "movieRateStackView"
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        return stackView
-    }()
-    
     private let movieReservationStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -188,6 +184,17 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
         stackView.distribution = .fill
         stackView.spacing = UIStackView.spacingUseSystem
         stackView.accessibilityIdentifier = "movieReservationStackView"
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private let movieRateStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.distribution = .fill
+        stackView.spacing = 15
+        stackView.accessibilityIdentifier = "movieRateStackView"
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -225,13 +232,6 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
         return stackView
     }()
     
-    private let movieStarRatingBarView: StarRatingBarView = {
-        let view = StarRatingBarView(isEnabled: false, userRating: 0)
-        view.accessibilityIdentifier = "movieStarRatingBarView"
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
     // MARK: - Variables
     var movie: Movie? {
         didSet {
@@ -240,9 +240,9 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
             movieGradeImageView.image = UIImage(named: movie.gradeImageName)
             movieOpeningDateLabel.text = "\(movie.date) 개봉"
             movieGenreAndRunningTimeLabel.text = "\(movie.genre ?? "")/\(movie.duration ?? 0)분"
-            movieReservationLabel.text = "\(movie.userRating)"
-            movieRateLabel.text = "\(movie.reservationGrade)위 \(movie.reservationRate)%"
-            movieAttendanceLabel.text = intWithCommas(num: movie.audience)
+            movieReservationLabel.text = "\(movie.reservationGrade)위 \(movie.reservationRate)%"
+            movieRateLabel.text = "\(movie.userRating)"
+            movieAttendanceLabel.text = movie.audience?.intWithCommas()
             movieStarRatingBarView.updateStarImageViews(userRating: movie.userRating)
         }
     }
@@ -282,16 +282,16 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
         [movieImageView, movieRightInfoStackView].forEach {
             movieTopStackView.addArrangedSubview($0)
         }
-        [movieRateTitleLabel, movieRateLabel].forEach {
-            movieRateStackView.addArrangedSubview($0)
-        }
-        [movieReservationTitleLabel, movieReservationLabel, movieStarRatingBarView].forEach {
+        [movieReservationTitleLabel, movieReservationLabel].forEach {
             movieReservationStackView.addArrangedSubview($0)
+        }
+        [movieRateTitleLabel, movieRateLabel, movieStarRatingBarView].forEach {
+            movieRateStackView.addArrangedSubview($0)
         }
         [movieAttendanceTitleLabel, movieAttendanceLabel].forEach {
             movieAttendanceStackView.addArrangedSubview($0)
         }
-        [movieRateStackView, movieReservationStackView, movieAttendanceStackView].forEach {
+        [movieReservationStackView, movieRateStackView, movieAttendanceStackView].forEach {
             movieBottomStackView.addArrangedSubview($0)
         }
         [movieTopStackView, movieBottomStackView].forEach {
@@ -322,14 +322,5 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
     @objc
     private func touchUpMovieImageView() {
         boxOfficeHeaderDelegate?.touchUpMovieImageView(image: movieImageView.image)
-    }
-    
-    private func intWithCommas(num: Int?) -> String? {
-        if let num = num {
-            let numberFormatter = NumberFormatter()
-            numberFormatter.numberStyle = .decimal
-            return numberFormatter.string(from: NSNumber(value: num))
-        }
-        return nil
     }
 }

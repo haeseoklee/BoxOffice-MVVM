@@ -44,6 +44,7 @@ struct Movie: Codable {
             return "ic_\(grade)"
         }
     }
+    static let empty: Movie = Movie(audience: nil, actor: nil, duration: nil, director: nil, thumb: nil, image: nil, synopsis: nil, genre: nil, grade: 0, reservationGrade: 0, title: "", reservationRate: 0, userRating: 0, date: "", id: "")
     
     enum CodingKeys: String, CodingKey {
         case audience, actor, director, duration, thumb, image

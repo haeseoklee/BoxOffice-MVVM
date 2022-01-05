@@ -59,9 +59,9 @@ class MovieListViewModel: MovieListViewModelType {
         changeOrderTypeObserver = changeOrderType.asObserver()
         touchMovieObserver = touchMovie.asObserver()
         
-        fetchMovies
-            .withLatestFrom(changeOrderType)
-            .map { orderType -> MovieOrderType in
+        Observable
+            .combineLatest(fetchMovies, changeOrderType)
+            .map { _, orderType -> MovieOrderType in
                 isActivated.onNext(true)
                 return orderType
             }
@@ -69,7 +69,6 @@ class MovieListViewModel: MovieListViewModelType {
                 domain.getMovieList(orderType: orderType.rawValue)
             }
             .subscribe(onNext: { movieList in
-                changeOrderType.onNext(MovieOrderType(rawValue: movieList.orderType) ?? .reservationRate)
                 movies.onNext(movieList.movies)
                 isActivated.onNext(false)
             }, onError: { error in

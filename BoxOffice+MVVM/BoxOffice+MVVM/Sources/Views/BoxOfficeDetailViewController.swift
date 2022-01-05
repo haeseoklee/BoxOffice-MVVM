@@ -154,7 +154,7 @@ final class BoxOfficeDetailViewController: UIViewController {
     
     private func presentMovieImageDetailViewController(image: UIImage) {
         let movieImageDetailViewController = MovieImageDetailViewController()
-        movieImageDetailViewController.movieObserver.onNext(image)
+        movieImageDetailViewController.image = image
         present(movieImageDetailViewController, animated: true, completion: nil)
     }
 }

@@ -9,5 +9,6 @@ target 'BoxOffice+MVVM' do
   pod 'RxSwift'
   pod 'RxCocoa'
   pod 'RxViewController'
+  pod 'RxGesture'
 
 end

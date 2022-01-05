@@ -29,8 +29,11 @@ final class MovieImageDetailViewController: UIViewController {
     }()
     
     // MARK: - Variables
-    private let movie: PublishSubject<UIImage> = PublishSubject<UIImage>()
-    var movieObserver: AnyObserver<UIImage> { movie.asObserver() }
+    var image: UIImage? {
+        didSet {
+            movieImageView.image = image
+        }
+    }
     
     private let disposeBag: DisposeBag = DisposeBag()
 
@@ -39,7 +42,6 @@ final class MovieImageDetailViewController: UIViewController {
         super.viewDidLoad()
         initViews()
         setupViews()
-        setupBindings()
     }
     
     private func initViews() {
@@ -64,13 +66,6 @@ final class MovieImageDetailViewController: UIViewController {
             movieImageView.widthAnchor.constraint(equalTo: movieImageScrollView.frameLayoutGuide.widthAnchor),
             movieImageView.heightAnchor.constraint(equalTo: movieImageScrollView.frameLayoutGuide.heightAnchor)
         ])
-    }
-    
-    private func setupBindings() {
-        movie
-            .asDriver(onErrorJustReturn: UIImage(named: "img_placeholder") ?? UIImage())
-            .drive(movieImageView.rx.image)
-            .disposed(by: disposeBag)
     }
 }
 

@@ -13,14 +13,12 @@ struct ImageLoader {
     
     func loadRx() -> Observable<UIImage> {
         return Observable.create { observer in
-            DispatchQueue.global().async {
-                load { result in
-                    switch result {
-                    case .success(let image):
-                        observer.onNext(image)
-                    case .failure(let error):
-                        observer.onError(error)
-                    }
+            load { result in
+                switch result {
+                case .success(let image):
+                    observer.onNext(image)
+                case .failure(let error):
+                    observer.onError(error)
                 }
             }
             return Disposables.create()

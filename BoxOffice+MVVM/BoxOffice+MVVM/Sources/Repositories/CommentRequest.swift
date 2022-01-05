@@ -13,14 +13,12 @@ struct CommentRequest {
     
     func getCommentListRx(movieId: String) -> Observable<CommentList> {
         return Observable.create { observer in
-            DispatchQueue.global().async {
-                sendGetCommentListRequest(movieId: movieId) { result in
-                    switch result {
-                    case .success(let comments):
-                        observer.onNext(comments)
-                    case .failure(let error):
-                        observer.onError(error)
-                    }
+            sendGetCommentListRequest(movieId: movieId) { result in
+                switch result {
+                case .success(let comments):
+                    observer.onNext(comments)
+                case .failure(let error):
+                    observer.onError(error)
                 }
             }
             return Disposables.create()
@@ -29,14 +27,12 @@ struct CommentRequest {
     
     func postCommentRx(comment: Comment) -> Observable<Comment> {
         return Observable.create { observer in
-            DispatchQueue.global().async {
-                sendPostCommentRequest(comment: comment) { result in
-                    switch result {
-                    case .success(let comment):
-                        observer.onNext(comment)
-                    case .failure(let error):
-                        observer.onError(error)
-                    }
+            sendPostCommentRequest(comment: comment) { result in
+                switch result {
+                case .success(let comment):
+                    observer.onNext(comment)
+                case .failure(let error):
+                    observer.onError(error)
                 }
             }
             return Disposables.create()

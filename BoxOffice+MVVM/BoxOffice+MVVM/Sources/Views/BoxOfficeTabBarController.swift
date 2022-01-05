@@ -32,6 +32,8 @@ final class BoxOfficeTabBarController: UITabBarController {
     
     // MARK: - Functions
     private func initViews() {
+        delegate = self
+        
         let boxOfficeTableViewController = BoxOfficeTableViewController()
         let boxOfficeCollectionViewController = BoxOfficeCollectionViewController()
         
@@ -44,3 +46,17 @@ final class BoxOfficeTabBarController: UITabBarController {
         viewControllers = [tableNavigationController, collectionNavigationController]
     }
 }
+
+// MARK: - UITabBarControllerDelegate
+extension BoxOfficeTabBarController: UITabBarControllerDelegate {
+    override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+        if item.title == "Collection" {
+            guard let navigationController = viewControllers?[1] as? UINavigationController else { return }
+            navigationController.popToRootViewController(animated: false)
+        } else {
+            guard let navigationController = viewControllers?[0] as? UINavigationController else { return }
+            navigationController.popToRootViewController(animated: false)
+        }
+    }
+}
+

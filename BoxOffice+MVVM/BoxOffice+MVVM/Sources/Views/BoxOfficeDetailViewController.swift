@@ -54,6 +54,7 @@ final class BoxOfficeDetailViewController: UIViewController {
         setupViews()
         setupNavigationBar()
         setupBindings()
+        setupNotification()
     }
     
     // MARK: - Functions
@@ -88,7 +89,9 @@ final class BoxOfficeDetailViewController: UIViewController {
         
         // Fetch comment list
         viewWillAppearOnce
-            .bind(to: commentListViewModel.fetchCommentsObserver)
+            .bind{ [weak self] _ in
+                self?.commentListViewModel.fetchCommentsObserver.onNext(())
+            }
             .disposed(by: disposeBag)
         
         // TableView
@@ -113,7 +116,6 @@ final class BoxOfficeDetailViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .bind {[weak self] isActivated in
                 if #available(iOS 13.0, *) {
-                    
                 } else {
                     UIApplication.shared.isNetworkActivityIndicatorVisible = isActivated
                 }
@@ -133,23 +135,33 @@ final class BoxOfficeDetailViewController: UIViewController {
         
         // Navigation
         movieViewModel.showMovieImageDetailViewController
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: {[weak self] image in
                 self?.presentMovieImageDetailViewController(image: image)
             })
             .disposed(by: disposeBag)
         
         movieViewModel.showBoxOfficeReviewWriteViewController
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: {[weak self] movie in
                 self?.presentBoxOfficeReviewWriteViewController(movie: movie)
             })
             .disposed(by: disposeBag)
     }
     
-    private func presentBoxOfficeReviewWriteViewController(movie: Movie?) {
-        let boxOfficeReviewWriteViewController = BoxOfficeReviewWriteViewController()
-        boxOfficeReviewWriteViewController.movie = movie
-        let navigationController = UINavigationController(rootViewController: boxOfficeReviewWriteViewController)
-        self.navigationController?.present(navigationController, animated: true, completion: nil)
+    private func setupNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(updateCommentList), name: .init("PostCommentFinished"), object: nil)
+    }
+    
+    @objc
+    private func updateCommentList() {
+        commentListViewModel.fetchCommentsObserver.onNext(())
+    }
+    
+    private func presentBoxOfficeReviewWriteViewController(movie: Movie) {
+        let boxOfficeReviewWriteViewController = BoxOfficeReviewWriteViewController(viewModel: CommentViewModel(selectedMovie: movie))
+        let reviewWriteNavigationController = UINavigationController(rootViewController: boxOfficeReviewWriteViewController)
+        present(reviewWriteNavigationController, animated: true, completion: nil)
     }
     
     private func presentMovieImageDetailViewController(image: UIImage) {

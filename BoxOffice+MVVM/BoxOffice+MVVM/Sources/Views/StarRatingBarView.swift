@@ -6,10 +6,7 @@
 //
 
 import UIKit
-
-protocol StarRatingBarDelegate: AnyObject {
-    func ratingUpdated(rating: Double?)
-}
+import RxSwift
 
 final class StarRatingBarView: UIView {
 
@@ -38,10 +35,9 @@ final class StarRatingBarView: UIView {
     
     private lazy var starRatingSlider: UISlider = {
         let slider = UISlider()
-        slider.addTarget(self, action: #selector(valueChangedStarRatingSlider), for: .valueChanged)
         slider.minimumValue = 0
         slider.maximumValue = 10
-        slider.value = 0
+        slider.value = 10
         slider.isEnabled = false
         slider.minimumTrackTintColor = .clear
         slider.maximumTrackTintColor = .clear
@@ -52,18 +48,27 @@ final class StarRatingBarView: UIView {
     }()
     
     // MARK: - Variables
-    weak var starRatingBarDelegate: StarRatingBarDelegate?
+    private let isEnabled: BehaviorSubject<Bool>
+    private let userRating: BehaviorSubject<Double>
+    
+    var isEnabledObserver: AnyObserver<Bool> { isEnabled.asObserver() }
+    var userRatingObserver: AnyObserver<Double> { userRating.asObserver() }
+    var userRatingObservable: Observable<Double> { userRating.asObservable() }
+    
+    private let disposeBag: DisposeBag = DisposeBag()
     
     // MARK: - Life Cycles
     init(isEnabled: Bool, userRating: Double) {
+        self.isEnabled = BehaviorSubject<Bool>(value: isEnabled)
+        self.userRating = BehaviorSubject<Double>(value: userRating)
         super.init(frame: .zero)
         setupViews()
-        starRatingSlider.isEnabled = isEnabled
-        starRatingSlider.value = Float(userRating)
-        updateStarImageViews(userRating: userRating)
+        setupBindings()
     }
     
     required init?(coder: NSCoder) {
+        isEnabled = BehaviorSubject<Bool>(value: false)
+        userRating = BehaviorSubject<Double>(value: 10)
         super.init(coder: coder)
     }
     
@@ -93,6 +98,34 @@ final class StarRatingBarView: UIView {
         NSLayoutConstraint.activate(starImageViewsRatioConstraints)
     }
     
+    private func setupBindings() {
+        isEnabled
+            .asDriver(onErrorJustReturn: false)
+            .drive(starRatingSlider.rx.isEnabled)
+            .disposed(by: disposeBag)
+            
+        userRating
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] rating in
+                self?.updateStarImageViews(userRating: rating)
+            }
+            .disposed(by: disposeBag)
+        
+        let starRatingSliderValue = starRatingSlider.rx.value
+            .map { ceil($0) }
+            .share(replay: 1, scope: .whileConnected)
+        
+        starRatingSliderValue
+            .asDriver(onErrorJustReturn: 0)
+            .drive(starRatingSlider.rx.value)
+            .disposed(by: disposeBag)
+        
+        starRatingSliderValue
+            .map { Double($0) }
+            .bind(to: userRating)
+            .disposed(by: disposeBag)
+    }
+    
     func updateStarImageViews(userRating: Double) {
         let emptyStarImage = UIImage(named: "ic_star_large")
         let fullStarImage = UIImage(named: "ic_star_large_full")
@@ -115,13 +148,5 @@ final class StarRatingBarView: UIView {
         if let view = starImageStackView.arrangedSubviews[idx] as? UIImageView {
             view.image = userRating % 2 == 0 ? fullStarImage : halfStarImage
         }
-    }
-                         
-    @objc
-    private func valueChangedStarRatingSlider() {
-        let currentRating = ceil(starRatingSlider.value)
-        starRatingSlider.setValue(currentRating, animated: true)
-        updateStarImageViews(userRating: Double(currentRating))
-        starRatingBarDelegate?.ratingUpdated(rating: Double(currentRating))
     }
 }

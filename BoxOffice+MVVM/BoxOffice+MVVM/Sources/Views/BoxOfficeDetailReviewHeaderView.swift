@@ -58,6 +58,11 @@ final class BoxOfficeDetailReviewHeaderView: UITableViewHeaderFooterView {
         setupBindings()
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
+    }
+    
     // MARK: - Functions
     private func setupViews() {
         contentView.backgroundColor = .white

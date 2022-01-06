@@ -98,6 +98,11 @@ final class BoxOfficeDetailTableViewCell: UITableViewCell {
         setupBindings()
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
+    }
+    
     // MARK: - Functions
     private func setupViews() {
         selectionStyle = .none

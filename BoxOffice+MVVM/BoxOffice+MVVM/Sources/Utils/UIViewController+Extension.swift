@@ -12,9 +12,7 @@ extension UIViewController {
     
     func showAlert(title: String?, message: String?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let cancelAction = UIAlertAction(title: "확인", style: .cancel) { [self] _ in
-            dismiss(animated: true, completion: nil)
-        }
+        let cancelAction = UIAlertAction(title: "확인", style: .cancel, handler: nil)
         alert.addAction(cancelAction)
         present(alert, animated: true, completion: nil)
     }

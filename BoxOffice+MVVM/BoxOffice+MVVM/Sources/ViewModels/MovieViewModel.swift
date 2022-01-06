@@ -120,7 +120,6 @@ class MovieViewModel: MovieViewModelType {
             .asObservable()
         
         showBoxOfficeReviewWriteViewController = touchReviewWriteButton
-            .throttle(.seconds(1), latest: false, scheduler: MainScheduler.instance)
             .withLatestFrom(movie)
             .asObservable()
     }

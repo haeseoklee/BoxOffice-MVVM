@@ -63,9 +63,9 @@ class CommentViewModel: CommentViewModelType {
         userNickNameObserver = userNickName.asObserver()
         userCommentObserver = userComment.asObserver()
         
-        Observable
-            .zip(touchCompleteButton, userRating, userNickName, userComment, movie)
-            .filter { _, rating, nickName, comment, movie in
+        touchCompleteButton
+            .withLatestFrom(Observable.combineLatest(userRating, userNickName, userComment, movie))
+            .filter {rating, nickName, comment, movie in
                 if rating == 0 {
                     throw NSError(domain: "한줄평 작성 오류", code: 700, userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 점수입니다"])
                 } else if nickName.isEmpty {
@@ -75,7 +75,7 @@ class CommentViewModel: CommentViewModelType {
                 }
                 return rating != 0 && !nickName.isEmpty && !comment.isEmpty
             }
-            .map { _, rating, nickName, comment, movie in
+            .map { rating, nickName, comment, movie in
                 Comment(id: nil, rating: rating, timestamp: nil, writer: nickName, movieId: movie.id, contents: comment)
             }
             .flatMap {

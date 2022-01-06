@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
+import RxViewController
 
 final class BoxOfficeReviewWriteViewController: UIViewController {
     
@@ -44,7 +47,6 @@ final class BoxOfficeReviewWriteViewController: UIViewController {
     
     private lazy var reviewStarRatingBarView: StarRatingBarView = {
         let starRatingBarView = StarRatingBarView(isEnabled: true, userRating: 10)
-        starRatingBarView.starRatingBarDelegate = self
         starRatingBarView.translatesAutoresizingMaskIntoConstraints = false
         return starRatingBarView
     }()
@@ -85,7 +87,6 @@ final class BoxOfficeReviewWriteViewController: UIViewController {
     
     private lazy var reviewTextView: UITextView = {
         let textView = UITextView()
-        textView.delegate = self
         textView.font = UIFont.systemFont(ofSize: 14)
         textView.text = "한줄평을 작성해주세요"
         textView.textColor = .systemGray4
@@ -117,40 +118,43 @@ final class BoxOfficeReviewWriteViewController: UIViewController {
     }()
 
     private lazy var leftBarButton: UIBarButtonItem = {
-        let leftBarButton = UIBarButtonItem(title: "취소", style: .plain, target: self, action: #selector(touchUpLeftBarButton(sender:)))
+        let leftBarButton = UIBarButtonItem(title: "취소", style: .plain, target: nil, action: nil)
         leftBarButton.tintColor = .white
         return leftBarButton
     }()
     
     private lazy var rightBarButton: UIBarButtonItem = {
-        let rightBarButton = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(touchUpRightBarButton(sender:)))
+        let rightBarButton = UIBarButtonItem(title: "완료", style: .plain, target: nil, action: nil)
         rightBarButton.tintColor = .white
         return rightBarButton
     }()
     
     // MARK: - Variables
-    var movie: Movie?
-    private var userRating: Double = 10 {
-        didSet {
-            reviewRatingLabel.text = "\(Int(userRating))"
-        }
-    }
+    private let viewModel: CommentViewModelType
+    private let disposeBag: DisposeBag = DisposeBag()
     
     // MARK: - Life Cycles
+    init(viewModel: CommentViewModelType = CommentViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        viewModel = CommentViewModel()
+        super.init(coder: coder)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         initViews()
         setupViews()
         setupNavigationBar()
+        setupBindings()
     }
     
     // MARK: - Functions
     private func initViews() {
         view.backgroundColor = .white
-        movieTitleLabel.text = movie?.title
-        movieGradeImageView.image = UIImage(named: movie?.gradeImageName ?? "ic_allages")
-        reviewerTextField.text = UserData.shared.nickname
-        reviewRatingLabel.text = "\(Int(userRating))"
     }
     
     private func setupViews() {
@@ -230,67 +234,101 @@ final class BoxOfficeReviewWriteViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationController?.navigationBar.barTintColor = UIColor(named: "app_purple")
         navigationItem.leftBarButtonItem = leftBarButton
         navigationItem.rightBarButtonItem = rightBarButton
-        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
         navigationItem.title = "한줄평 작성"
     }
     
-    private func sendComment(comment: Comment) {
-        CommentRequest.shared.sendPostCommentRequest(comment: comment) {[weak self] result in
-            switch result {
-            case .success(let data):
-                DispatchQueue.main.async {
-                    UserData.shared.nickname = data.writer
-                    self?.dismiss(animated: true, completion: {
-                        NotificationCenter.default.post(name: .init("PostCommentFinished"), object: nil)
-                    })
-                }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self?.showAlert(title: "오류", message: "코멘트를 저장하지 못했습니다\nError: \(error)")
+    private func setupBindings() {
+        
+        // leftBarButton
+        leftBarButton.rx.tap
+            .bind(to: viewModel.touchCancelButtonObserver)
+            .disposed(by: disposeBag)
+        
+        // rightBarButton
+        rightBarButton.rx.tap
+            .bind(to: viewModel.touchCompleteButtonObserver)
+            .disposed(by: disposeBag)
+        
+        // reviewRatingLabel
+        let userRating = reviewStarRatingBarView.userRatingObservable
+            .share(replay: 1, scope: .whileConnected)
+        
+        userRating
+            .bind(to: viewModel.userRatingObserver)
+            .disposed(by: disposeBag)
+        
+        userRating
+            .map{"\(Int($0))"}
+            .asDriver(onErrorJustReturn: "")
+            .drive(reviewRatingLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        // reviewerTextField
+        reviewerTextField.rx.text.orEmpty
+            .distinctUntilChanged()
+            .debounce(.milliseconds(800), scheduler: MainScheduler.instance)
+            .bind(to: viewModel.userNickNameObserver)
+            .disposed(by: disposeBag)
+        
+        // reviewTextView
+        reviewTextView.rx.text.orEmpty
+            .distinctUntilChanged()
+            .debounce(.milliseconds(800), scheduler: MainScheduler.instance)
+            .bind(to: viewModel.userCommentObserver)
+            .disposed(by: disposeBag)
+        
+        reviewTextView.rx.didBeginEditing
+            .observe(on: MainScheduler.instance)
+            .bind {[weak self] _ in
+                if self?.reviewTextView.textColor == .systemGray4 {
+                    self?.reviewTextView.text = nil
+                    self?.reviewTextView.textColor = .black
                 }
             }
-        }
-    }
-    
-    @objc
-    private func touchUpLeftBarButton(sender: Any) {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    @objc
-    private func touchUpRightBarButton(sender: Any) {
-        guard let movieId = movie?.id, let reviewer = reviewerTextField.text else { return }
-        let comment = Comment(id: nil, rating: Double(userRating), timestamp: nil, writer: reviewer, movieId: movieId, contents: reviewTextView.text)
-        sendComment(comment: comment)
-    }
-}
-
-// MARK: - UITextViewDelegate
-extension BoxOfficeReviewWriteViewController: UITextViewDelegate {
-    
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.textColor == .systemGray4 {
-            textView.text = nil
-            textView.textColor = .black
-        }
-    }
-    
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.isEmpty {
-            textView.text = "한줄평을 작성해주세요"
-            textView.textColor = .systemGray4
-        }
-    }
-}
-
-// MARK: - StarRatingBarDelegate
-extension BoxOfficeReviewWriteViewController: StarRatingBarDelegate {
-    func ratingUpdated(rating: Double?) {
-        if let rating = rating {
-            userRating = rating
-        }
+            .disposed(by: disposeBag)
+        
+        reviewTextView.rx.didEndEditing
+            .observe(on: MainScheduler.instance)
+            .bind {[weak self] _ in
+                guard let text = self?.reviewTextView.text else { return }
+                if text.isEmpty {
+                    self?.reviewTextView.text = "한줄평을 작성해주세요"
+                    self?.reviewTextView.textColor = .systemGray4
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        // movieTitleLabel
+        viewModel.movieTitleTextObservable
+            .asDriver(onErrorJustReturn: "")
+            .drive(movieTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        // movieGradeImageView
+        viewModel.movieGradeImageObservable
+            .asDriver(onErrorJustReturn: UIImage())
+            .drive(movieGradeImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        // errorMessage
+        viewModel.errorMessageObservable
+            .map { $0.localizedDescription }
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] message in
+                self?.showAlert(title: "오류", message: message)
+            }
+            .disposed(by: disposeBag)
+        
+        // Navigation
+        viewModel.showBoxOfficeDetailViewController
+            .observe(on: MainScheduler.instance)
+            .bind { [weak self] _ in
+                self?.dismiss(animated: true, completion: {
+                    NotificationCenter.default.post(name: .init("PostCommentFinished"), object: nil)
+                })
+            }
+            .disposed(by: disposeBag)
     }
 }

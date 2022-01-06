@@ -52,7 +52,7 @@ class CommentViewModel: CommentViewModelType {
         let touchCompleteButton = PublishSubject<Void>()
         let userRating = BehaviorSubject<Double>(value: 10)
         let userNickName = BehaviorSubject<String>(value: UserData.shared.nickname ?? "" )
-        let userComment = PublishSubject<String>()
+        let userComment = BehaviorSubject<String>(value: "")
         let movie = BehaviorSubject<Movie>(value: selectedMovie)
         let errorMessage = PublishSubject<NSError>()
         
@@ -67,13 +67,13 @@ class CommentViewModel: CommentViewModelType {
             .withLatestFrom(Observable.combineLatest(userRating, userNickName, userComment, movie))
             .filter {rating, nickName, comment, movie in
                 if rating == 0 {
-                    throw NSError(domain: "한줄평 작성 오류", code: 700, userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 점수입니다"])
+                    errorMessage.onNext(NSError(domain: "한줄평 작성 오류", code: 700, userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 점수입니다"]))
                 } else if nickName.isEmpty {
-                    throw NSError(domain: "한줄평 작성 오류", code: 701, userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 닉네임입니다"])
-                } else if comment.isEmpty {
-                    throw NSError(domain: "한줄평 작성 오류", code: 702, userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 코멘트입니다"])
+                    errorMessage.onNext(NSError(domain: "한줄평 작성 오류", code: 701, userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 닉네임입니다"]))
+                } else if comment.isEmpty || comment == "한줄평을 작성해주세요" {
+                    errorMessage.onNext(NSError(domain: "한줄평 작성 오류", code: 702, userInfo: [NSLocalizedDescriptionKey: "유효하지 않은 코멘트입니다"]))
                 }
-                return rating != 0 && !nickName.isEmpty && !comment.isEmpty
+                return rating != 0 && !nickName.isEmpty && !comment.isEmpty && comment != "한줄평을 작성해주세요"
             }
             .map { rating, nickName, comment, movie in
                 Comment(id: nil, rating: rating, timestamp: nil, writer: nickName, movieId: movie.id, contents: comment)
@@ -89,7 +89,6 @@ class CommentViewModel: CommentViewModelType {
             .disposed(by: disposeBag)
         
         // Output
-        
         movieTitleTextObservable = movie
             .map { $0.title }
             .asObservable()

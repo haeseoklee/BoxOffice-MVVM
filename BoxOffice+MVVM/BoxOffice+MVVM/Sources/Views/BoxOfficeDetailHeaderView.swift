@@ -335,6 +335,7 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
 
         movieImageView.rx
             .tapGesture()
+            .when(.recognized)
             .map { _ in ()}
             .bind(to: touchMovieImage)
             .disposed(by: cellDisposeBag)

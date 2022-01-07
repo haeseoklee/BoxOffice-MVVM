@@ -8,6 +8,10 @@
 import UIKit
 import RxSwift
 
+class ImageCacheManager {
+    static let shared: NSCache<NSString, UIImage>  = NSCache<NSString, UIImage>()
+}
+
 struct ImageLoader {
     let url: String
     
@@ -25,13 +29,21 @@ struct ImageLoader {
         }
     }
     
-    func load(completion: @escaping (Result<UIImage, ImageLoaderError>) -> Void) {
+    private func load(completion: @escaping (Result<UIImage, ImageLoaderError>) -> Void) {
+        
+        let imageKey = url as NSString
+        if let cachedImage = ImageCacheManager.shared.object(forKey: imageKey) {
+            completion(.success(cachedImage))
+            return
+        }
+        
         if let url = URL(string: self.url) {
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 guard let response = response as? HTTPURLResponse, response.statusCode == 200, error == nil, let data = data, let image = UIImage(data: data) else {
                     completion(.failure(.unknown))
                     return
                 }
+                ImageCacheManager.shared.setObject(image, forKey: imageKey)
                 completion(.success(image))
             }
             task.resume()

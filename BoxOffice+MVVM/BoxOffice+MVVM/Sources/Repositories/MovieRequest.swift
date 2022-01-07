@@ -9,11 +9,10 @@ import Foundation
 import RxSwift
 
 struct MovieRequest {
-    static let shared = MovieRequest()
     
-    func getMovieListRx(orderType: Int) -> Observable<MovieList> {
+    static func getMovieListRx(orderType: Int) -> Observable<MovieList> {
         return Observable.create { observer in
-            sendGetMovieListRequest(orderType: orderType) { result in
+            MovieRequest.sendGetMovieListRequest(orderType: orderType) { result in
                 switch result {
                 case .success(let movies):
                     observer.onNext(movies)
@@ -25,9 +24,9 @@ struct MovieRequest {
         }
     }
     
-    func getMovieRx(id: String) -> Observable<Movie> {
+    static func getMovieRx(id: String) -> Observable<Movie> {
         return Observable.create { observer in
-            sendGetMovieRequest(id: id) { result in
+            MovieRequest.sendGetMovieRequest(id: id) { result in
                 switch result {
                 case .success(let movie):
                     observer.onNext(movie)
@@ -39,7 +38,7 @@ struct MovieRequest {
         }
     }
     
-    func sendGetMovieListRequest(orderType: Int, completion: @escaping (Result<MovieList, RequestError>) -> Void) {
+    private static func sendGetMovieListRequest(orderType: Int, completion: @escaping (Result<MovieList, RequestError>) -> Void) {
         var components = URLComponents(string: APIConstants.movieListURL)
         let items: [URLQueryItem] = [
             URLQueryItem(name: "order_type", value: "\(orderType)")
@@ -73,7 +72,7 @@ struct MovieRequest {
         }
     }
     
-    func sendGetMovieRequest(id: String, completion: @escaping (Result<Movie, RequestError>) -> Void) {
+    private static func sendGetMovieRequest(id: String, completion: @escaping (Result<Movie, RequestError>) -> Void) {
         var components = URLComponents(string: APIConstants.movieURL)
         let items: [URLQueryItem] = [
             URLQueryItem(name: "id", value: "\(id)")

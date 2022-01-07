@@ -27,30 +27,20 @@ extension UIViewController {
             message: "영화를 어떤 순서로 정렬할까요?",
             preferredStyle: UIAlertController.Style.actionSheet
         )
-        let reservationRateAction = UIAlertAction(
-            title: "예매율",
-            style: .default,
-            handler: reservationRateAction
-        )
-        let curationAction = UIAlertAction(
-            title: "큐레이션",
-            style: .default,
-            handler: curationAction
-        )
-        let openingDateAction = UIAlertAction(
-            title: "개봉일",
-            style: .default,
-            handler: openingDateAction
-        )
-        let cancel = UIAlertAction(
-            title: "취소",
-            style: .cancel,
-            handler : nil
-        )
-        alert.addAction(reservationRateAction)
-        alert.addAction(curationAction)
-        alert.addAction(openingDateAction)
-        alert.addAction(cancel)
+        MovieOrderType.allCases.forEach { type in
+            var handler: ((UIAlertAction) -> Void)?
+            switch type {
+            case .reservationRate:
+                handler = reservationRateAction
+            case .curation:
+                handler = curationAction
+            case .openingDate:
+                handler = openingDateAction
+            }
+            let action = UIAlertAction(title: type.toKorean(), style: .default, handler: handler)
+            alert.addAction(action)
+        }
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler : nil))
         present(alert, animated: true, completion: nil)
     }
 }

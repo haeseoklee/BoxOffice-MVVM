@@ -8,6 +8,7 @@
 import Foundation
 
 extension Int {
+    
     func intWithCommas() -> String? {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal

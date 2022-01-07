@@ -7,6 +7,7 @@
 
 import UIKit
 import RxSwift
+import RxGesture
 
 final class StarRatingBarView: UIView {
 
@@ -123,6 +124,20 @@ final class StarRatingBarView: UIView {
         starRatingSliderValue
             .map { Double($0) }
             .bind(to: userRating)
+            .disposed(by: disposeBag)
+        
+        starRatingSlider.rx
+            .tapGesture()
+            .when(.recognized)
+            .bind {[weak self] sender in
+                let location = sender.location(in: self)
+                let minimumValue = self?.starRatingSlider.minimumValue ?? 0
+                let maximumValue = self?.starRatingSlider.maximumValue ?? 10
+                let width = self?.starRatingSlider.bounds.width ?? 100
+                let percent = minimumValue + Float(location.x / width) * maximumValue
+                self?.starRatingSlider.setValue(percent, animated: true)
+                self?.starRatingSlider.sendActions(for: .valueChanged)
+            }
             .disposed(by: disposeBag)
     }
     

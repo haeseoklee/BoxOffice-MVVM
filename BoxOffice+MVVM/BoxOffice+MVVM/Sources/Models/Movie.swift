@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MovieOrderType: Int {
+enum MovieOrderType: Int, CaseIterable {
     case reservationRate = 0, curation = 1, openingDate = 2
     func toKorean() -> String {
         switch self {

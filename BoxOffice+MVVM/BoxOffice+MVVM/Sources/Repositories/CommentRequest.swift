@@ -9,11 +9,10 @@ import Foundation
 import RxSwift
 
 struct CommentRequest {
-    static let shared = CommentRequest()
     
-    func getCommentListRx(movieId: String) -> Observable<CommentList> {
+    static func getCommentListRx(movieId: String) -> Observable<CommentList> {
         return Observable.create { observer in
-            sendGetCommentListRequest(movieId: movieId) { result in
+            CommentRequest.sendGetCommentListRequest(movieId: movieId) { result in
                 switch result {
                 case .success(let comments):
                     observer.onNext(comments)
@@ -25,9 +24,9 @@ struct CommentRequest {
         }
     }
     
-    func postCommentRx(comment: Comment) -> Observable<Comment> {
+    static func postCommentRx(comment: Comment) -> Observable<Comment> {
         return Observable.create { observer in
-            sendPostCommentRequest(comment: comment) { result in
+            CommentRequest.sendPostCommentRequest(comment: comment) { result in
                 switch result {
                 case .success(let comment):
                     observer.onNext(comment)
@@ -39,7 +38,7 @@ struct CommentRequest {
         }
     }
     
-    func sendGetCommentListRequest(movieId: String, completion: @escaping (Result<CommentList, RequestError>) -> Void) {
+    private static func sendGetCommentListRequest(movieId: String, completion: @escaping (Result<CommentList, RequestError>) -> Void) {
         var components = URLComponents(string: APIConstants.reviewListURL)
         let items: [URLQueryItem] = [
             URLQueryItem(name: "movie_id", value: "\(movieId)")
@@ -69,7 +68,7 @@ struct CommentRequest {
         }
     }
     
-    func sendPostCommentRequest(comment: Comment, completion: @escaping (Result<Comment, RequestError>) -> Void) {
+    private static func sendPostCommentRequest(comment: Comment, completion: @escaping (Result<Comment, RequestError>) -> Void) {
         guard let url = URL(string: APIConstants.commentURL) else {
             completion(.failure(.invalidArgument))
             return

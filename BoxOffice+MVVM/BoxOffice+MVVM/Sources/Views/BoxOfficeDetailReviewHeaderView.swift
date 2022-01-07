@@ -82,7 +82,6 @@ final class BoxOfficeDetailReviewHeaderView: UITableViewHeaderFooterView {
     
     private func setupBindings() {
         reviewWriteButton.rx.tap
-            .map { _ in () }
             .bind(to: touchReviewWriteButton)
             .disposed(by: cellDisposeBag)
     }

@@ -66,7 +66,6 @@ final class BoxOfficeCollectionViewController: UIViewController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         movieCollectionView.reloadData()
-        movieCollectionView.layoutIfNeeded()
     }
     
     // MARK: - Functions
@@ -197,7 +196,7 @@ final class BoxOfficeCollectionViewController: UIViewController {
     }
 }
 
-// MARK: - UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout
+// MARK: - UICollectionViewDelegateFlowLayout
 extension BoxOfficeCollectionViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {

@@ -108,9 +108,7 @@ BoxOffice 애플리케이션은 서버의 API를 통해 영화 정보를 요청�
 
 ## 아키텍처 구성도
 
-
-
-
+![BoxOffice MVVM Architecture 001](https://user-images.githubusercontent.com/20268101/148633179-60beee09-cab5-4651-b0cd-b2ad22f10ac6.jpeg)
 
 
 

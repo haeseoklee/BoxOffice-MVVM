@@ -7,17 +7,17 @@
 
 ## 목차
 
-* <a href="#프로젝트%20개요">프로젝트 개요</a>
+* <a href="#프로젝트_개요">프로젝트 개요</a>
 * <a href="#적용기술">적용기술</a>
-* <a href="#아키텍처%20구성도">아키텍처 구성도</a>
-* <a href="#프로젝트%20상세기능">프로젝트 상세기능</a>
-* <a href="#디렉토리%20구조">디렉토리 구조</a>
+* <a href="#아키텍처_구성도">아키텍처 구성도</a>
+* <a href="#프로젝트_상세기능">프로젝트 상세기능</a>
+* <a href="#디렉토리구조">디렉토리 구조</a>
 
 
 
-## 프로젝트 개요
+## 프로젝트_개요
 
-네이버 커넥트 재단에서 운영하는 BoostCourse의 [iOS 앱 프로그래밍 심화과정](https://www.boostcourse.org/mo326) 마지막 프로젝트를 <a href="#아키텍처%20구성도">MVVM 아키텍처</a>로 재구현하였습니다. 
+네이버 커넥트 재단에서 운영하는 BoostCourse의 [iOS 앱 프로그래밍 심화과정](https://www.boostcourse.org/mo326) 마지막 프로젝트를 <a href="#아키텍처_구성도">MVVM 아키텍처</a>로 재구현하였습니다. 
 
 BoxOffice 애플리케이션은 서버의 API를 통해 영화 정보를 요청하고, 가져온 정보를 테이블 뷰와 컬렉션 뷰를 활용하여 화면에 표현해줍니다. 
 
@@ -32,11 +32,11 @@ BoxOffice 애플리케이션은 서버의 API를 통해 영화 정보를 요청�
 * [RxViewController](https://github.com/devxoul/RxViewController)
 * [RxGesture](https://github.com/RxSwiftCommunity/RxGesture)
 
-## 아키텍처 구성도
+## 아키텍처_구성도
 
 ![BoxOffice MVVM Architecture 001](https://user-images.githubusercontent.com/20268101/148633179-60beee09-cab5-4651-b0cd-b2ad22f10ac6.jpeg)
 
-## 프로젝트 상세기능
+## 프로젝트_상세기능
 
 ### 1. 영화 목록
 
@@ -103,7 +103,7 @@ BoxOffice 애플리케이션은 서버의 API를 통해 영화 정보를 요청�
 
 
 
-## 디렉토리 구조
+## 디렉토리_구조
 
 ```text
 BoxOffice+MVVM

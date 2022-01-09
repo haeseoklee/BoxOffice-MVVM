@@ -5,29 +5,36 @@
   <img alt="swift" src="https://img.shields.io/badge/iOS-15.2-lightgrey" />
 </div>
 
-[데모 영상 보러가기](https://user-images.githubusercontent.com/20268101/148556998-c870bfd9-9838-4f41-863f-62200ec794da.mp4)
-
 ## 목차
 
-* <a href="#프로젝트 개요">프로젝트 개요</a>
-* <a href="#프로젝트 상세기능">프로젝트 상세기능</a>
+* <a href="#프로젝트%20개요">프로젝트 개요</a>
 * <a href="#적용기술">적용기술</a>
-* <a href="#아키텍처 구성도">아키텍처 구성도</a>
-* <a href="#디렉토리 구조">디렉토리 구조</a>
+* <a href="#아키텍처%20구성도">아키텍처 구성도</a>
+* <a href="#프로젝트%20상세기능">프로젝트 상세기능</a>
+* <a href="#디렉토리%20구조">디렉토리 구조</a>
 
 
 
 ## 프로젝트 개요
 
-본 프로젝트는 MVVM 및 RxSwift 학습을 목적으로, 네이버 커넥트 재단에서 운영하는 BoostCourse의 [iOS 앱 프로그래밍 심화과정](https://www.boostcourse.org/mo326)의 마지막 프로젝트를 MVVM 아키텍처로 재구현하였습니다. 
+네이버 커넥트 재단에서 운영하는 BoostCourse의 [iOS 앱 프로그래밍 심화과정](https://www.boostcourse.org/mo326) 마지막 프로젝트를 <a href="#아키텍처%20구성도">MVVM 아키텍처</a>로 재구현하였습니다. 
 
 BoxOffice 애플리케이션은 서버의 API를 통해 영화 정보를 요청하고, 가져온 정보를 테이블 뷰와 컬렉션 뷰를 활용하여 화면에 표현해줍니다. 
 
 여러 조건 (예매율순, 큐레이션, 개봉일순)에 따라 영화 정보를 요청할 수 있고, 영화 목록 중 원하는 영화를 선택하여 상세 정보를 볼 수 있습니다. 
 
-또한 리뷰 작성 버튼을 클릭하며 한 줄 감상평을 남길 수 있습니다.
+또한 리뷰 작성 버튼을 클릭하여 한 줄 감상평을 남길 수 있습니다.
 
+## 적용기술
 
+* [RxSwift](https://github.com/ReactiveX/RxSwift)
+* [RxCocoa](https://github.com/ReactiveX/RxSwift)
+* [RxViewController](https://github.com/devxoul/RxViewController)
+* [RxGesture](https://github.com/RxSwiftCommunity/RxGesture)
+
+## 아키텍처 구성도
+
+![BoxOffice MVVM Architecture 001](https://user-images.githubusercontent.com/20268101/148633179-60beee09-cab5-4651-b0cd-b2ad22f10ac6.jpeg)
 
 ## 프로젝트 상세기능
 
@@ -93,22 +100,6 @@ BoxOffice 애플리케이션은 서버의 API를 통해 영화 정보를 요청�
 * 닉네임 또는 한줄평이 모두 작성되지 않은 상태에서 '완료' 버튼을 누르면 경고 알림창이 뜹니다.
 * '취소' 버튼을 누르면 이전 화면으로 되돌아 갑니다
 * 기존에 작성했던 닉네임이 있다면 3번 화면으로 새로 진입할 때 기존의 닉네임이 입력되어 있습니다.
-
-## 적용기술
-
-* [RxSwift](https://github.com/ReactiveX/RxSwift)
-
-* [RxCocoa](https://github.com/ReactiveX/RxSwift)
-
-* [RxViewController](https://github.com/devxoul/RxViewController)
-
-* [RxGesture](https://github.com/RxSwiftCommunity/RxGesture)
-
-  
-
-## 아키텍처 구성도
-
-![BoxOffice MVVM Architecture 001](https://user-images.githubusercontent.com/20268101/148633179-60beee09-cab5-4651-b0cd-b2ad22f10ac6.jpeg)
 
 
 

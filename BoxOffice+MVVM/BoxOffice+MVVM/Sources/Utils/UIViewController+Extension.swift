@@ -17,30 +17,21 @@ extension UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    func showActionSheet(
-        reservationRateAction: ((UIAlertAction) -> Void)?,
-        curationAction: ((UIAlertAction) -> Void)?,
-        openingDateAction: ((UIAlertAction) -> Void)?
-    ) {
+    func showActionSheet(actionItems: [ActionItem]) {
         let alert = UIAlertController(
             title: "정렬방식 선택",
             message: "영화를 어떤 순서로 정렬할까요?",
             preferredStyle: UIAlertController.Style.actionSheet
         )
-        MovieOrderType.allCases.forEach { type in
-            var handler: ((UIAlertAction) -> Void)?
-            switch type {
-            case .reservationRate:
-                handler = reservationRateAction
-            case .curation:
-                handler = curationAction
-            case .openingDate:
-                handler = openingDateAction
-            }
-            let action = UIAlertAction(title: type.toKorean(), style: .default, handler: handler)
-            alert.addAction(action)
+        actionItems.forEach { item in
+            alert.addAction(UIAlertAction(title: item.title, style: .default, handler: item.handler))
         }
         alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler : nil))
         present(alert, animated: true, completion: nil)
     }
+}
+
+struct ActionItem {
+    let title: String
+    let handler: ((UIAlertAction) -> Void)?
 }

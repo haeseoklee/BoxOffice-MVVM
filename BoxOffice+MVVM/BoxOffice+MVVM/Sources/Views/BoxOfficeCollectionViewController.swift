@@ -123,11 +123,11 @@ final class BoxOfficeCollectionViewController: UIViewController {
         rightBarButton.rx.tap
             .observe(on: MainScheduler.instance)
             .bind { [weak self] _ in
-                self?.showActionSheet(
-                    reservationRateAction: self?.touchUpReservationRateAction(_:),
-                    curationAction: self?.touchUpCurationAction(_:),
-                    openingDateAction: self?.touchUpOpeningDateAction(_:)
-                )
+                self?.showActionSheet(actionItems: [
+                    ActionItem(title: MovieOrderType.reservationRate.toKorean, handler: self?.touchUpReservationRateAction),
+                    ActionItem(title: MovieOrderType.curation.toKorean, handler: self?.touchUpCurationAction),
+                    ActionItem(title: MovieOrderType.openingDate.toKorean, handler: self?.touchUpOpeningDateAction)
+                ])
             }
             .disposed(by: disposeBag)
         

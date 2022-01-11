@@ -323,7 +323,7 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
                 self?.movieGenreAndRunningTimeLabel.text = "\(movie.genre ?? "")/\(movie.duration ?? 0)분"
                 self?.movieReservationLabel.text = "\(movie.reservationGrade)위 \(movie.reservationRate)%"
                 self?.movieRateLabel.text = "\(movie.userRating)"
-                self?.movieAttendanceLabel.text = movie.audience?.intWithCommas()
+                self?.movieAttendanceLabel.text = movie.audience?.intWithCommas
                 self?.movieStarRatingBarView.updateStarImageViews(userRating: movie.userRating)
             }
             .disposed(by: cellDisposeBag)

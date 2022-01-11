@@ -72,7 +72,7 @@ class MovieListViewModel: MovieListViewModelType {
                 movies.onNext(movieList.movies)
                 isActivated.onNext(false)
             }, onError: { error in
-                errorMessage.onError(error)
+                errorMessage.onNext(error as NSError)
             })
             .disposed(by: disposeBag)
         

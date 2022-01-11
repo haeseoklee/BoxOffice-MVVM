@@ -40,7 +40,9 @@ struct ImageLoader {
         if let url = URL(string: self.url) {
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 guard let response = response as? HTTPURLResponse, response.statusCode == 200, error == nil, let data = data, let image = UIImage(data: data) else {
-                    completion(.failure(.unknown))
+                    if let error = error as? ImageLoaderError {
+                        completion(.failure(error))
+                    }
                     return
                 }
                 ImageCacheManager.shared.setObject(image, forKey: imageKey)

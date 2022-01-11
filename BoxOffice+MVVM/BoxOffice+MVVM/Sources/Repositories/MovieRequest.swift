@@ -46,6 +46,7 @@ struct MovieRequest {
         
         if !((0...2) ~= orderType) {
             completion(.failure(.invalidArgument))
+            return
         }
         
         components?.queryItems = items

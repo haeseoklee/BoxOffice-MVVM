@@ -131,8 +131,6 @@
 			isa = PBXGroup;
 			children = (
 				1C4A71E027843EC30017E326 /* Assets.xcassets */,
-				1C4A71DD27843EB60017E326 /* APIConstants.swift */,
-				1C4A71DC27843EB60017E326 /* Constants.swift */,
 				1C4A719627842B600017E326 /* LaunchScreen.storyboard */,
 				1C4A719927842B600017E326 /* Info.plist */,
 			);
@@ -149,6 +147,7 @@
 				1C4A71A527842F360017E326 /* ViewModels */,
 				1C4A71A627842F450017E326 /* Views */,
 				1C4A71A727842F4C0017E326 /* Utils */,
+				1CC918B8278D5B1200178636 /* Constants */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -231,6 +230,15 @@
 				1C4A71E827857C300017E326 /* Int+Extension.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		1CC918B8278D5B1200178636 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				1C4A71DD27843EB60017E326 /* APIConstants.swift */,
+				1C4A71DC27843EB60017E326 /* Constants.swift */,
+			);
+			path = Constants;
 			sourceTree = "<group>";
 		};
 		515135E737B6BFFE381377C1 /* Frameworks */ = {

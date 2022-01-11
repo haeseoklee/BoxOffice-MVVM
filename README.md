@@ -116,11 +116,10 @@ BoxOffice+MVVM
 │   ├── Repositories
 │   ├── ViewModels
 │   ├── Views
-│   └── Utils
+│   ├── Utils
+│   └── Constants
 └── Resources
     ├── Assets
-    ├── APIConstants.swift
-    ├── Constants.swift
     ├── LaunchScreen.storyboard
     └── Info.plist
 

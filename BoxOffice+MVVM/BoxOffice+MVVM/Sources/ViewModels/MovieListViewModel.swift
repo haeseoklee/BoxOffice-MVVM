@@ -82,7 +82,7 @@ class MovieListViewModel: MovieListViewModelType {
             .asObservable()
         
         changedOrderTypeTextObservable = changeOrderType
-            .map { $0.toKorean() }
+            .map { $0.toKorean }
             .asObservable()
                 
         moviesObservable = movies.asObservable()

@@ -9,7 +9,7 @@ import Foundation
 
 enum MovieOrderType: Int, CaseIterable {
     case reservationRate = 0, curation = 1, openingDate = 2
-    func toKorean() -> String {
+    var toKorean: String {
         switch self {
         case .reservationRate:
             return "예매율순"

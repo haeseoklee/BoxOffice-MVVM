@@ -28,7 +28,6 @@ protocol MovieListViewModelType {
 
 class MovieListViewModel: MovieListViewModelType {
     
-    static let shared: MovieListViewModelType = MovieListViewModel()
     private let disposeBag: DisposeBag = DisposeBag()
     
     // Input

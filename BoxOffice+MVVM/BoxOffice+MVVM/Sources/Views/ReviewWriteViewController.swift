@@ -10,7 +10,7 @@ import RxSwift
 import RxCocoa
 import RxViewController
 
-final class BoxOfficeReviewWriteViewController: UIViewController {
+final class ReviewWriteViewController: UIViewController {
     
     // MARK: - Views
     private let reviewScrollView: UIScrollView = {
@@ -322,7 +322,7 @@ final class BoxOfficeReviewWriteViewController: UIViewController {
             .disposed(by: disposeBag)
         
         // Navigation
-        viewModel.showBoxOfficeDetailViewController
+        viewModel.showDetailViewController
             .observe(on: MainScheduler.instance)
             .bind { [weak self] _ in
                 self?.dismiss(animated: true, completion: {

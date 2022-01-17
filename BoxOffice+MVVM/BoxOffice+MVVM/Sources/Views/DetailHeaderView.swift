@@ -10,7 +10,7 @@ import RxSwift
 import RxCocoa
 import RxGesture
 
-final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
+final class DetailHeaderView: UITableViewHeaderFooterView {
     
     // MARK: - Views
     private lazy var movieImageView: UIImageView = {
@@ -323,7 +323,7 @@ final class BoxOfficeDetailHeaderView: UITableViewHeaderFooterView {
                 self?.movieGenreAndRunningTimeLabel.text = "\(movie.genre ?? "")/\(movie.duration ?? 0)분"
                 self?.movieReservationLabel.text = "\(movie.reservationGrade)위 \(movie.reservationRate)%"
                 self?.movieRateLabel.text = "\(movie.userRating)"
-                self?.movieAttendanceLabel.text = movie.audience?.intWithCommas
+                self?.movieAttendanceLabel.text = movie.audience?.decimal
                 self?.movieStarRatingBarView.updateStarImageViews(userRating: movie.userRating)
             }
             .disposed(by: cellDisposeBag)

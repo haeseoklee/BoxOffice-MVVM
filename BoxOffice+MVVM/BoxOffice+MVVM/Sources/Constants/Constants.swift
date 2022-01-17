@@ -9,15 +9,15 @@ import Foundation
 
 enum Constants {
     enum Identifier {
-        static let boxOfficeDetailHeaderView = "BoxOfficeDetailHeaderView"
-        static let boxOfficeDetailSummaryHeaderView =
-        "BoxOfficeDetailSummaryHeaderView"
-        static let boxOfficeDetailInfoHeaderView =
-        "BoxOfficeDetailInfoHeaderView"
-        static let boxOfficeDetailReviewHeaderView =
-        "BoxOfficeDetailReviewHeaderView"
-        static let boxOfficeTableViewCell = "BoxOfficeTableViewCell"
-        static let boxOfficeCollectionViewCell = "BoxOfficeCollectionViewCell"
-        static let boxOfficeDetailTableViewCell = "BoxOfficeDetailTableViewCell"
+        static let detailHeaderView = "DetailHeaderView"
+        static let detailSummaryHeaderView =
+        "DetailSummaryHeaderView"
+        static let detailInfoHeaderView =
+        "DetailInfoHeaderView"
+        static let detailReviewHeaderView =
+        "DetailReviewHeaderView"
+        static let tableViewCell = "TableViewCell"
+        static let collectionViewCell = "CollectionViewCell"
+        static let detailTableViewCell = "DetailTableViewCell"
     }
 }

@@ -71,6 +71,7 @@ final class BoxOfficeDetailViewController: UIViewController {
     
     private func setupNavigationBar() {
         navigationController?.navigationBar.tintColor = .white
+        navigationItem.backButtonTitle = "영화목록"
         
         movieViewModel.movieObservable
             .map { $0.title }

@@ -36,13 +36,13 @@ final class BoxOfficeTableViewController: UIViewController {
     private var disposeBag: DisposeBag = DisposeBag()
     
     // MARK: - Life Cycles
-    init() {
-        viewModel = MovieListViewModel.shared
+    init(viewModel: MovieListViewModelType = MovieListViewModel()) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
-        viewModel = MovieListViewModel.shared
+        self.viewModel = MovieListViewModel()
         super.init(coder: coder)
     }
     

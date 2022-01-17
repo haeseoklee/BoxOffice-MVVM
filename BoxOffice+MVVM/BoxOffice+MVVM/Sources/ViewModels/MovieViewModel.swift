@@ -24,7 +24,7 @@ protocol MovieViewModelType {
     
     // Navigation
     var showMovieImageDetailViewController: Observable<UIImage> { get }
-    var showBoxOfficeReviewWriteViewController: Observable<Movie> { get }
+    var showReviewWriteViewController: Observable<Movie> { get }
 }
 
 class MovieViewModel: MovieViewModelType {
@@ -45,7 +45,7 @@ class MovieViewModel: MovieViewModelType {
     
     // Navigation
     let showMovieImageDetailViewController: Observable<UIImage>
-    let showBoxOfficeReviewWriteViewController: Observable<Movie>
+    let showReviewWriteViewController: Observable<Movie>
     
     init(selectedMovie: Movie = Movie.empty, domain: BoxOfficeType = BoxOffice()) {
         
@@ -119,7 +119,7 @@ class MovieViewModel: MovieViewModelType {
             .withLatestFrom(movieImage)
             .asObservable()
         
-        showBoxOfficeReviewWriteViewController = touchReviewWriteButton
+        showReviewWriteViewController = touchReviewWriteButton
             .withLatestFrom(movie)
             .asObservable()
     }

@@ -24,7 +24,7 @@ protocol CommentViewModelType {
     var errorMessageObservable: Observable<NSError> { get }
     
     // Navigation
-    var showBoxOfficeDetailViewController: Observable<Void> { get }
+    var showDetailViewController: Observable<Void> { get }
 }
 
 class CommentViewModel: CommentViewModelType {
@@ -44,7 +44,7 @@ class CommentViewModel: CommentViewModelType {
     let errorMessageObservable: Observable<NSError>
     
     // Navigation
-    let showBoxOfficeDetailViewController: Observable<Void>
+    let showDetailViewController: Observable<Void>
     
     init(selectedMovie: Movie = Movie.empty, domain: BoxOfficeType = BoxOffice()) {
         
@@ -102,7 +102,7 @@ class CommentViewModel: CommentViewModelType {
             .map { $0 as NSError }
             .asObservable()
         
-        showBoxOfficeDetailViewController = touchCancelButton
+        showDetailViewController = touchCancelButton
             .asObservable()
     }
 }

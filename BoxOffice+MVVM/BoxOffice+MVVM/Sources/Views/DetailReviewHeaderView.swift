@@ -9,7 +9,7 @@ import UIKit
 import RxSwift
 import RxCocoa
 
-final class BoxOfficeDetailReviewHeaderView: UITableViewHeaderFooterView {
+final class DetailReviewHeaderView: UITableViewHeaderFooterView {
     
     // MARK: - Views
     private let reviewTitleLabel: UILabel = {

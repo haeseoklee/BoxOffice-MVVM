@@ -8,14 +8,14 @@
 import UIKit
 import RxSwift
 
-final class BoxOfficeCollectionViewController: UIViewController {
+final class CollectionViewController: UIViewController {
     
     // MARK: - Views
     private lazy var movieCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.refreshControl = refreshControl
-        collectionView.register(BoxOfficeCollectionViewCell.self, forCellWithReuseIdentifier: Constants.Identifier.boxOfficeCollectionViewCell)
+        collectionView.register(CollectionViewCell.self, forCellWithReuseIdentifier: Constants.Identifier.collectionViewCell)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
@@ -32,12 +32,12 @@ final class BoxOfficeCollectionViewController: UIViewController {
     }()
     
     // MARK: - Variables
-    private var boxOfficeCollectionViewCellSize: CGSize {
+    private var collectionViewCellSize: CGSize {
         let width = (view.safeAreaLayoutGuide.layoutFrame.size.width - 20) / 2
         return CGSize(width: width, height: width * 2)
     }
     
-    private var boxOfficeLandscapeCollectionViewCellSize: CGSize {
+    private var landscapeCollectionViewCellSize: CGSize {
         let width = (view.safeAreaLayoutGuide.layoutFrame.size.width - 30) / 3
         return CGSize(width: width, height: width * 2)
     }
@@ -145,8 +145,8 @@ final class BoxOfficeCollectionViewController: UIViewController {
         viewModel.moviesObservable
             .asDriver(onErrorJustReturn: [])
             .drive(movieCollectionView.rx.items(
-                cellIdentifier: Constants.Identifier.boxOfficeCollectionViewCell,
-                cellType: BoxOfficeCollectionViewCell.self)
+                cellIdentifier: Constants.Identifier.collectionViewCell,
+                cellType: CollectionViewCell.self)
             ) { index, item, cell in
                 cell.movieObserver.onNext(item)
                 cell.errorMessageObservable
@@ -168,18 +168,18 @@ final class BoxOfficeCollectionViewController: UIViewController {
             .disposed(by: disposeBag)
         
         // navigation
-        viewModel.showBoxOfficeDetailViewController
+        viewModel.showDetailViewController
             .bind(onNext: {[weak self] movie in
-                self?.pushToBoxOfficeDetailViewController(movie: movie)
+                self?.pushToDetailViewController(movie: movie)
             })
             .disposed(by: disposeBag)
     }
     
-    private func pushToBoxOfficeDetailViewController(movie: Movie) {
-        let boxOfficeDetailViewController = BoxOfficeDetailViewController()
-        boxOfficeDetailViewController.commentListViewModel = CommentListViewModel(movie: movie)
-        boxOfficeDetailViewController.movieViewModel = MovieViewModel(selectedMovie: movie)
-        navigationController?.pushViewController(boxOfficeDetailViewController, animated: true)
+    private func pushToDetailViewController(movie: Movie) {
+        let detailViewController = DetailViewController()
+        detailViewController.commentListViewModel = CommentListViewModel(movie: movie)
+        detailViewController.movieViewModel = MovieViewModel(selectedMovie: movie)
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
     
     
@@ -197,7 +197,7 @@ final class BoxOfficeCollectionViewController: UIViewController {
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
-extension BoxOfficeCollectionViewController: UICollectionViewDelegateFlowLayout {
+extension CollectionViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
@@ -205,9 +205,9 @@ extension BoxOfficeCollectionViewController: UICollectionViewDelegateFlowLayout 
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if UIDevice.current.orientation.isLandscape {
-            return boxOfficeLandscapeCollectionViewCellSize
+            return landscapeCollectionViewCellSize
         }
-        return boxOfficeCollectionViewCellSize
+        return collectionViewCellSize
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {

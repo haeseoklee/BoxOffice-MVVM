@@ -23,7 +23,7 @@ protocol MovieListViewModelType {
     var errorMessageObservable: Observable<NSError> { get }
     
     // Navigation
-    var showBoxOfficeDetailViewController: Observable<Movie> { get }
+    var showDetailViewController: Observable<Movie> { get }
 }
 
 class MovieListViewModel: MovieListViewModelType {
@@ -42,7 +42,7 @@ class MovieListViewModel: MovieListViewModelType {
     let errorMessageObservable: Observable<NSError>
     
     // Navigation
-    let showBoxOfficeDetailViewController: Observable<Movie>
+    let showDetailViewController: Observable<Movie>
     
     init(domain: BoxOfficeType = BoxOffice()) {
         let fetchMovies = PublishSubject<Void>()
@@ -91,7 +91,7 @@ class MovieListViewModel: MovieListViewModelType {
             .asObservable()
         
         // Navigation
-        showBoxOfficeDetailViewController = touchMovie
+        showDetailViewController = touchMovie
             .asObservable()
     }
 }

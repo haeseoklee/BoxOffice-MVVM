@@ -13,16 +13,16 @@ enum MovieDetailTableViewSection: Int, CaseIterable {
     case header, summary, info, comment
 }
 
-final class BoxOfficeDetailViewController: UIViewController {
+final class DetailViewController: UIViewController {
     
     // MARK: - Views
     private lazy var movieDetailTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: UITableView.Style.grouped)
-        tableView.register(BoxOfficeDetailHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.boxOfficeDetailHeaderView)
-        tableView.register(BoxOfficeDetailSummaryHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.boxOfficeDetailSummaryHeaderView)
-        tableView.register(BoxOfficeDetailInfoHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.boxOfficeDetailInfoHeaderView)
-        tableView.register(BoxOfficeDetailReviewHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.boxOfficeDetailReviewHeaderView)
-        tableView.register(BoxOfficeDetailTableViewCell.self, forCellReuseIdentifier: Constants.Identifier.boxOfficeDetailTableViewCell)
+        tableView.register(DetailHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.detailHeaderView)
+        tableView.register(DetailSummaryHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.detailSummaryHeaderView)
+        tableView.register(DetailInfoHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.detailInfoHeaderView)
+        tableView.register(DetailReviewHeaderView.self, forHeaderFooterViewReuseIdentifier: Constants.Identifier.detailReviewHeaderView)
+        tableView.register(DetailTableViewCell.self, forCellReuseIdentifier: Constants.Identifier.detailTableViewCell)
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.separatorStyle = .none
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -142,10 +142,10 @@ final class BoxOfficeDetailViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        movieViewModel.showBoxOfficeReviewWriteViewController
+        movieViewModel.showReviewWriteViewController
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: {[weak self] movie in
-                self?.presentBoxOfficeReviewWriteViewController(movie: movie)
+                self?.presentReviewWriteViewController(movie: movie)
             })
             .disposed(by: disposeBag)
     }
@@ -159,9 +159,9 @@ final class BoxOfficeDetailViewController: UIViewController {
         commentListViewModel.fetchCommentsObserver.onNext(())
     }
     
-    private func presentBoxOfficeReviewWriteViewController(movie: Movie) {
-        let boxOfficeReviewWriteViewController = BoxOfficeReviewWriteViewController(viewModel: CommentViewModel(selectedMovie: movie))
-        let reviewWriteNavigationController = UINavigationController(rootViewController: boxOfficeReviewWriteViewController)
+    private func presentReviewWriteViewController(movie: Movie) {
+        let reviewWriteViewController = ReviewWriteViewController(viewModel: CommentViewModel(selectedMovie: movie))
+        let reviewWriteNavigationController = UINavigationController(rootViewController: reviewWriteViewController)
         present(reviewWriteNavigationController, animated: true, completion: nil)
     }
     
@@ -173,7 +173,7 @@ final class BoxOfficeDetailViewController: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
-extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSource {
+extension DetailViewController: UITableViewDelegate, UITableViewDataSource {
 
     func numberOfSections(in tableView: UITableView) -> Int {
         return MovieDetailTableViewSection.allCases.count
@@ -191,9 +191,9 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
         let sectionKind = MovieDetailTableViewSection(rawValue: indexPath.section)
         if sectionKind == .comment {
             guard let cell = tableView.dequeueReusableCell(
-                withIdentifier: Constants.Identifier.boxOfficeDetailTableViewCell,
+                withIdentifier: Constants.Identifier.detailTableViewCell,
                 for: indexPath
-            ) as? BoxOfficeDetailTableViewCell else {
+            ) as? DetailTableViewCell else {
                 return UITableViewCell()
             }
             let item = comments[indexPath.row]
@@ -208,7 +208,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
         let sectionKind = MovieDetailTableViewSection(rawValue: section)
         switch sectionKind {
         case .header:
-            guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.boxOfficeDetailHeaderView) as? BoxOfficeDetailHeaderView else {
+            guard let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.detailHeaderView) as? DetailHeaderView else {
                 return defaultHeaderView
             }
             movieViewModel.fetchMovieImageObserver.onNext(())
@@ -227,7 +227,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
             
             return headerView
         case .summary:
-            guard let summaryView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.boxOfficeDetailSummaryHeaderView) as? BoxOfficeDetailSummaryHeaderView else {
+            guard let summaryView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.detailSummaryHeaderView) as? DetailSummaryHeaderView else {
                 return defaultHeaderView
             }
             movieViewModel.movieObservable
@@ -235,7 +235,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
                 .disposed(by: summaryView.disposeBag)
             return summaryView
         case .info:
-            guard let infoView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.boxOfficeDetailInfoHeaderView) as? BoxOfficeDetailInfoHeaderView else {
+            guard let infoView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.detailInfoHeaderView) as? DetailInfoHeaderView else {
                 return defaultHeaderView
             }
             movieViewModel.movieObservable
@@ -243,7 +243,7 @@ extension BoxOfficeDetailViewController: UITableViewDelegate, UITableViewDataSou
                 .disposed(by: infoView.disposeBag)
             return infoView
         case .comment:
-            guard let reviewView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.boxOfficeDetailReviewHeaderView) as? BoxOfficeDetailReviewHeaderView else {
+            guard let reviewView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Constants.Identifier.detailReviewHeaderView) as? DetailReviewHeaderView else {
                 return defaultHeaderView
             }
             reviewView.touchReviewWriteButtonObservable

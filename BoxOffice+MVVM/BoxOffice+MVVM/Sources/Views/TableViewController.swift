@@ -9,13 +9,13 @@ import UIKit
 import RxSwift
 import RxViewController
 
-final class BoxOfficeTableViewController: UIViewController {
+final class TableViewController: UIViewController {
     
     // MARK: - Views
     private lazy var movieTableView: UITableView = {
         let tableView = UITableView()
         tableView.refreshControl = refreshControl
-        tableView.register(BoxOfficeTableViewCell.self, forCellReuseIdentifier: Constants.Identifier.boxOfficeTableViewCell)
+        tableView.register(TableViewCell.self, forCellReuseIdentifier: Constants.Identifier.tableViewCell)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
@@ -127,8 +127,8 @@ final class BoxOfficeTableViewController: UIViewController {
         viewModel.moviesObservable
             .asDriver(onErrorJustReturn: [])
             .drive(movieTableView.rx.items(
-                cellIdentifier: Constants.Identifier.boxOfficeTableViewCell,
-                cellType: BoxOfficeTableViewCell.self)
+                cellIdentifier: Constants.Identifier.tableViewCell,
+                cellType: TableViewCell.self)
             ) { index, item, cell in
                 cell.movieObserver.onNext(item)
                 cell.errorMessageObservable
@@ -150,18 +150,18 @@ final class BoxOfficeTableViewController: UIViewController {
             .disposed(by: disposeBag)
         
         // navigation
-        viewModel.showBoxOfficeDetailViewController
+        viewModel.showDetailViewController
             .bind(onNext: {[weak self] movie in
-                self?.pushToBoxOfficeDetailViewController(movie: movie)
+                self?.pushToDetailViewController(movie: movie)
             })
             .disposed(by: disposeBag)
     }
 
-    private func pushToBoxOfficeDetailViewController(movie: Movie) {
-        let boxOfficeDetailViewController = BoxOfficeDetailViewController()
-        boxOfficeDetailViewController.commentListViewModel = CommentListViewModel(movie: movie)
-        boxOfficeDetailViewController.movieViewModel = MovieViewModel(selectedMovie: movie)
-        navigationController?.pushViewController(boxOfficeDetailViewController, animated: true)
+    private func pushToDetailViewController(movie: Movie) {
+        let detailViewController = DetailViewController()
+        detailViewController.commentListViewModel = CommentListViewModel(movie: movie)
+        detailViewController.movieViewModel = MovieViewModel(selectedMovie: movie)
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
     
     private func touchUpReservationRateAction(_ alertAction: UIAlertAction) {
@@ -178,9 +178,9 @@ final class BoxOfficeTableViewController: UIViewController {
 }
 
 // MARK: - UITableViewDelegate
-extension BoxOfficeTableViewController: UITableViewDelegate {
+extension TableViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return BoxOfficeTableViewCell.height
+        return TableViewCell.height
     }
 }

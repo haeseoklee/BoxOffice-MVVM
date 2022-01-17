@@ -9,7 +9,7 @@ import Foundation
 
 extension Int {
     
-    var intWithCommas: String? {
+    var decimal: String? {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         return numberFormatter.string(from: NSNumber(value: self))

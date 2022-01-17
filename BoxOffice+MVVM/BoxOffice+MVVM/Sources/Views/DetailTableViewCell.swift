@@ -8,7 +8,7 @@
 import UIKit
 import RxSwift
 
-final class BoxOfficeDetailTableViewCell: UITableViewCell {
+final class DetailTableViewCell: UITableViewCell {
     
     // MARK: - Views
     private let reviewerImageView: UIImageView = {
